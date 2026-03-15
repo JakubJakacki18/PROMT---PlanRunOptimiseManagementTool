@@ -117,6 +117,40 @@ Projekt powstał jako **praca dyplomowa inżynierska**, obejmująca:
 - testowanie oraz wnioski końcowe
 
 ---
+## Instalacja
+1. Utwórz plik `.env` w katalogu głównym projektu
+2. Wypełnij plik `.env` zgodnie ze schematem
+```.env
+# Przykładowy plk
+#Bezpieczeństwo
+SECRET_KEY=klucz
+DEBUG=True
+ALLOWED_HOSTS=127.0.0.1,localhost
+
+#Baza danych Postgres
+DB_NAME=name
+DB_USER=user
+DB_PASSWORD=password
+DB_HOST=db
+DB_PORT=5432
+
+#Konto admina
+DJANGO_SUPERUSER_USERNAME=admin
+DJANGO_SUPERUSER_EMAIL=admin@example.com
+DJANGO_SUPERUSER_PASSWORD=admin
+```
+3. Zbuduj w terminalu oraz uruchom `sudo docker compose up --build`
+
+Od tego momentu będzie można dotrzeć do jednej ze stron:
+
+|     Nazwa      |                  Adres strony                   |
+|:--------------:|:----------------------------------------------:|
+|  Django admin  | [http://localhost:8000](http://localhost:8000) |
+| React frontend | [http://localhost:5137](http://localhost:5137) |
+
+Bez zmian w kodzie można uruchamiać obrazy za pomocą `sudo docker compose up`.
+
+Dodatkowy parametr `-d` uruchamia w tle.
 
 ## Autor
 
