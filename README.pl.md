@@ -143,10 +143,10 @@ DJANGO_SUPERUSER_PASSWORD=admin
 
 Od tego momentu będzie można dotrzeć do jednej ze stron:
 
-|     Nazwa      |                  Adres strony                   |
+|     Nazwa      |                  Adres strony                  |
 |:--------------:|:----------------------------------------------:|
 |  Django admin  | [http://localhost:8000](http://localhost:8000) |
-| React frontend | [http://localhost:5137](http://localhost:5137) |
+| React frontend | [http://localhost:5173](http://localhost:5173) |
 
 Bez zmian w kodzie można uruchamiać obrazy za pomocą `sudo docker compose up`.
 
