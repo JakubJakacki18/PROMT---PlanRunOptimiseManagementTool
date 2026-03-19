@@ -45,9 +45,6 @@ services:
         condition: service_healthy
     ports:
       - "8000:8000"
-    volumes:
-      - .:/promt_cont
-    working_dir: /promt_cont/backend
     environment:
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}

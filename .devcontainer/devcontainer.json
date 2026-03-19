@@ -1,8 +1,0 @@
-{
-  "name": "PROMT Dev Container",
-  "dockerComposeFile": "../docker-compose.yml",
-  "service": "backend",
-  "workspaceFolder": "/promt_cont",
-  "runServices": ["db", "backend", "frontend"],
-  "shutdownAction": "stopCompose"
-}
