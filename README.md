@@ -121,7 +121,208 @@ This project is based on an **engineering diploma thesis**, which includes:
 
 ---
 
-## Author
+## Installation and Setup (Docker)
+
+### Requirements
+
+Before running the application, make sure you have installed:
+
+- Docker Desktop (Windows / macOS) or Docker Engine (Linux)
+- WSL2 (for Windows)
+- Git (optional, for cloning the repository)
+
+---
+
+### 1. Clone the repository
+
+```bash
+git clone <repo_url>
+cd PROMT---PlanRunOptimiseManagementTool
+```
+
+---
+
+### 2. Environment configuration
+
+Create a `.env` file in the root directory of the project:
+
+```env
+# Security
+SECRET_KEY=your-secret-key
+DEBUG=True
+ALLOWED_HOSTS=127.0.0.1,localhost
+
+# Database (PostgreSQL)
+DB_NAME=promt_db
+DB_USER=promt_user
+DB_PASSWORD=promt_password
+DB_HOST=db
+DB_PORT=5432
+
+# Admin account
+DJANGO_SUPERUSER_USERNAME=admin
+DJANGO_SUPERUSER_EMAIL=admin@example.com
+DJANGO_SUPERUSER_PASSWORD=admin123
+```
+
+---
+
+### 3. Run the application
+
+Start all services (backend, frontend, database):
+
+```bash
+docker compose up --build
+```
+
+The application will automatically:
+
+- apply database migrations
+- create the default admin user
+
+---
+
+### 4. Access the application
+
+| Service          | URL                          |
+|------------------|------------------------------|
+| Backend (Django) | http://localhost:8000        |
+| Admin panel      | http://localhost:8000/admin  |
+| Frontend (React) | http://localhost:5173        |
+
+---
+
+### Database access (PostgreSQL)
+
+The application uses a PostgreSQL database running inside a Docker container.
+
+Connection details (based on `.env`):
+
+- Host (from host machine): `localhost`
+- Port: `5433`
+- Database: `DB_NAME`
+- User: `DB_USER`
+- Password: `DB_PASSWORD`
+
+You can connect using tools such as:
+
+- DBeaver
+- TablePlus
+- pgAdmin
+
+Official PostgreSQL website:
+https://www.postgresql.org/download/
+
+---
+
+### 5. Seed test data
+
+To populate the database with demo data:
+
+```bash
+docker compose exec backend python manage.py seed
+```
+
+Reset and regenerate demo data:
+
+```bash
+docker compose exec backend python manage.py seed --reset
+```
+
+---
+
+### 6. Useful commands
+
+#### Migrations
+```bash
+docker compose exec backend python manage.py makemigrations
+docker compose exec backend python manage.py migrate
+```
+
+#### Create superuser
+```bash
+docker compose exec backend python manage.py createsuperuser
+```
+
+#### Django shell
+```bash
+docker compose exec backend python manage.py shell
+```
+
+#### Logs
+```bash
+docker compose logs
+docker compose logs backend
+docker compose logs db
+```
+
+---
+
+### 7. Stop the application
+
+```bash
+docker compose down
+```
+
+---
+
+### 8. Reset environment (remove database)
+
+```bash
+docker compose down -v
+docker compose up --build
+```
+
+---
+
+### 9. Troubleshooting
+
+#### Docker is not running (Windows)
+
+Check:
+
+```bash
+docker version
+wsl -l -v
+```
+
+Expected state:
+- docker-desktop → Running
+- Ubuntu → Running
+
+---
+
+#### Backend cannot connect to database
+
+Verify `.env` configuration:
+
+```env
+DB_HOST=db
+DB_PORT=5432
+```
+
+---
+
+### Notes
+
+- Database data is stored in a Docker volume (`postgres_data`) and persists across container restarts
+- All backend operations should be executed via `docker compose exec backend`
+- The project uses a containerized architecture — no need to install dependencies locally
+
+## Author - Dev
 
 **Marek Turkowicz 2026**
+---
+
+## QA Team
+Marek Turkowicz
+
+Jakub Jakacki
+
+Jakub Kazimiruk
+
+Emilia Nodzewska
+
+Konrad Orzechowski
+
 ---
