@@ -211,8 +211,10 @@ class Command(BaseCommand):
         statuses = ["new", "active", "closed"]
 
         for i in range(count):
-            start_date = today - timedelta(days=random.randint(0, 120))
-            end_date = start_date + timedelta(days=random.randint(45, 300))
+            start_int = random.randint(0, 120)
+            end_int = random.randint(start_int, 300)
+            start_date = today - timedelta(days=start_int)
+            end_date = start_date + timedelta(days=end_int)
 
             project, _ = Project.objects.get_or_create(
                 name=f"Projekt {i+1} - {random.choice(project_types)}",
