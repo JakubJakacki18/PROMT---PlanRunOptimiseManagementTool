@@ -211,8 +211,10 @@ class Command(BaseCommand):
         statuses = ["new", "active", "closed"]
 
         for i in range(count):
-            start_date = today - timedelta(days=random.randint(0, 120))
-            end_date = start_date + timedelta(days=random.randint(45, 300))
+            start_int = random.randint(0, 120)
+            end_int = random.randint(0, 300)
+            start_date = today - timedelta(days=start_int)
+            end_date = start_date + timedelta(days=end_int)
 
             project, _ = Project.objects.get_or_create(
                 name=f"Projekt {i+1} - {random.choice(project_types)}",
@@ -244,7 +246,10 @@ class Command(BaseCommand):
                 allocation_end_candidates = [
                     d for d in [project.end_date, funding.end_date] if d is not None
                 ]
-                allocation_end = min(allocation_end_candidates) if allocation_end_candidates else None
+                allocation_end = max(allocation_end_candidates) if allocation_end_candidates else None
+
+                # if allocation_start and allocation_end and allocation_end < allocation_start:
+                #     allocation_end = allocation_start
 
                 pf, _ = ProjectFunding.objects.get_or_create(
                     project=project,
