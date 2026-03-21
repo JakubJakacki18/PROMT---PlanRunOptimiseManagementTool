@@ -13,12 +13,14 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-
 from datetime import timedelta
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BACKEND_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = BACKEND_DIR.parent
+
+IN_DOCKER = os.path.exists('/.dockerenv')
 load_dotenv(BASE_DIR / ".env")
 
 # Quick-start development settings - unsuitable for production
@@ -137,8 +139,8 @@ DATABASES = {
         "NAME": os.getenv("DB_NAME", "promt_db"),
         "USER": os.getenv("DB_USER", "promt_user"),
         "PASSWORD": os.getenv("DB_PASSWORD", ""),
-        "HOST": os.getenv("DB_HOST", "localhost"),
-        "PORT": os.getenv("DB_PORT", "5432"),
+        "HOST": os.getenv("DB_HOST", "db") if IN_DOCKER else os.getenv("LOCAL_DB_HOST", "localhost"),
+        "PORT": os.getenv("DB_PORT", "5432") if IN_DOCKER else os.getenv("LOCAL_DB_PORT", "5432"),
     }
 }
 

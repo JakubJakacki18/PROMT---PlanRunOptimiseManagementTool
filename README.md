@@ -159,6 +159,10 @@ DB_PASSWORD=promt_password
 DB_HOST=db
 DB_PORT=5432
 
+#Adres do uruchamiania projektu lokalnie
+LOCAL_DB_HOST = localhost
+LOCAL_DB_PORT = 5433
+
 # Admin account
 DJANGO_SUPERUSER_USERNAME=admin
 DJANGO_SUPERUSER_EMAIL=admin@example.com
