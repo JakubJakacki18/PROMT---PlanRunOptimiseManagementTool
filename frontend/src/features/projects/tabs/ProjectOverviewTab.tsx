@@ -16,6 +16,11 @@ import {
 } from "recharts";
 
 import "./ProjectOverviewTab.css";
+import {
+  buildCycleBuckets,
+  computeMedian,
+  type CycleBucket,
+} from "../deliveryUtils";
 
 type DailyActivityPoint = {
   date: string;
@@ -26,11 +31,6 @@ type DailyActivityPoint = {
 
 type WeekdayStat = {
   weekday: number;
-  label: string;
-  count: number;
-};
-
-type CycleBucket = {
   label: string;
   count: number;
 };
@@ -394,35 +394,17 @@ export default function ProjectOverviewTab() {
     });
 
     let avgCycleTimeCalc: number | null = null;
-    let medianCycleTimeCalc: number | null = null;
     let maxCycleTimeCalc: number | null = null;
 
-    const cycleBucketsCalc: CycleBucket[] = [
-      { label: "0–1d", count: 0 },
-      { label: "2–3d", count: 0 },
-      { label: "4–7d", count: 0 },
-      { label: "8+d", count: 0 },
-    ];
+    const medianCycleTimeCalc = computeMedian(cycleDurations);
+    const cycleBucketsCalc = buildCycleBuckets(cycleDurations);
 
     if (cycleDurations.length > 0) {
       const sum = cycleDurations.reduce((acc, d) => acc + d, 0);
       avgCycleTimeCalc = sum / cycleDurations.length;
 
       const sorted = [...cycleDurations].sort((a, b) => a - b);
-      const mid = Math.floor(sorted.length / 2);
-      medianCycleTimeCalc =
-        sorted.length % 2 === 0
-          ? (sorted[mid - 1] + sorted[mid]) / 2
-          : sorted[mid];
-
       maxCycleTimeCalc = sorted[sorted.length - 1];
-
-      cycleDurations.forEach((d) => {
-        if (d <= 1) cycleBucketsCalc[0].count += 1;
-        else if (d <= 3) cycleBucketsCalc[1].count += 1;
-        else if (d <= 7) cycleBucketsCalc[2].count += 1;
-        else cycleBucketsCalc[3].count += 1;
-      });
     }
 
     const recentSorted = [...tasks].sort((a, b) => {

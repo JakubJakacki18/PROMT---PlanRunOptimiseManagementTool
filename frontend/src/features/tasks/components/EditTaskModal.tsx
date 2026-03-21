@@ -7,6 +7,13 @@ import {
 } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  titleField,
+  estHoursField,
+  costAmountField,
+  receiptUrlField,
+  validateDateRange,
+} from "../taskValidation";
 
 import { usePickProjectsQuery, usePickFundingsQuery } from "../tasksApi";
 import { useListUsersQuery } from "../../api/usersApi";
@@ -31,7 +38,7 @@ export interface EditTaskModalProps {
 
 const TaskEditSchema = z
   .object({
-    title: z.string().trim().min(3, "Tytuł musi mieć min. 3 znaki"),
+    title: titleField,
     description: z.string().optional(),
 
     status: z.enum(["todo", "doing", "done"]),
@@ -40,35 +47,11 @@ const TaskEditSchema = z
     start_date: z.string().optional(),
     due_date: z.string().optional(),
 
-    est_hours: z
-      .string()
-      .optional()
-      .refine(
-        (v) =>
-          v === undefined ||
-          v === "" ||
-          (!Number.isNaN(parseFloat(v)) && parseFloat(v) >= 0),
-        "Szacowany czas musi być ≥ 0"
-      ),
-    cost_amount: z
-      .string()
-      .optional()
-      .refine(
-        (v) =>
-          v === undefined ||
-          v === "" ||
-          (!Number.isNaN(parseFloat(v)) && parseFloat(v) >= 0),
-        "Koszt musi być ≥ 0"
-      ),
+    est_hours: estHoursField,
+    cost_amount: costAmountField,
     cost_currency: z.string().optional().default("PLN"),
 
-    receipt_url: z
-      .string()
-      .optional()
-      .refine(
-        (v) => !v || v.trim() === "" || /^https?:\/\/.+/i.test(v),
-        "Niepoprawny adres URL"
-      ),
+    receipt_url: receiptUrlField,
     receipt_note: z.string().optional(),
 
     scope: z.enum(["unassigned", "project", "funding"]),
@@ -76,7 +59,7 @@ const TaskEditSchema = z
     fundingId: z.string().optional(),
   })
   .superRefine((data, ctx) => {
-    if (data.start_date && data.due_date && data.start_date > data.due_date) {
+    if (!validateDateRange(data.start_date, data.due_date)) {
       ctx.addIssue({
         code: "custom",
         path: ["due_date"],

@@ -28,6 +28,7 @@ import {
 } from "recharts";
 
 import "./ProjectTeamTab.css";
+import { filterTasksByAssignee } from "../../tasks/taskUtils";
 
 type PersonKpi = {
   user: AppUser;
@@ -330,8 +331,7 @@ export default function ProjectTeamTab() {
     if (selectionMode === "none") return [] as Task[];
 
     if (selectionMode === "single" && singlePerson) {
-      const id = singlePerson.user.id;
-      return tasks.filter((t) => (t.assignees ?? []).some((u) => u.id === id));
+      return filterTasksByAssignee(tasks, singlePerson.user.id);
     }
 
     const ids = selectedSet;
