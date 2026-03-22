@@ -108,7 +108,7 @@ class Command(BaseCommand):
                 user=user,
                 defaults={
                     "role": roles[i] if i < len(roles) else random.choice(roles[1:]),
-                    "phone": fake.phone_number()[:20],
+                    "phone": f"+48{random.randint(100000000, 999999999)}",
                     "avatar_url": "",
                 },
             )
