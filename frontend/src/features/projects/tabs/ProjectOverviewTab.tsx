@@ -19,6 +19,7 @@ import "./ProjectOverviewTab.css";
 import {
   buildCycleBuckets,
   computeMedian,
+  computeAverage,
   type CycleBucket,
 } from "../deliveryUtils";
 
@@ -400,8 +401,7 @@ export default function ProjectOverviewTab() {
     const cycleBucketsCalc = buildCycleBuckets(cycleDurations);
 
     if (cycleDurations.length > 0) {
-      const sum = cycleDurations.reduce((acc, d) => acc + d, 0);
-      avgCycleTimeCalc = sum / cycleDurations.length;
+      avgCycleTimeCalc = computeAverage(cycleDurations);
 
       const sorted = [...cycleDurations].sort((a, b) => a - b);
       maxCycleTimeCalc = sorted[sorted.length - 1];

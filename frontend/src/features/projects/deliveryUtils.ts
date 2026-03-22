@@ -16,6 +16,11 @@ export function buildCycleBuckets(durations: number[]): CycleBucket[] {
   return buckets;
 }
 
+export function computeAverage(arr: number[]): number | null {
+  if (!arr.length) return null;
+  return arr.reduce((acc, d) => acc + d, 0) / arr.length;
+}
+
 export function computeMedian(arr: number[]): number | null {
   if (!arr.length) return null;
   const sorted = [...arr].sort((a, b) => a - b);
