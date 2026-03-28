@@ -9,6 +9,7 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     globals: true,
     css: true,
-    slowTestThreshold: 2000, 
+    slowTestThreshold: 2000,
+    exclude: ["**/node_modules/**", "**/e2e/**"],
   },
 })
