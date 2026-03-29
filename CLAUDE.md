@@ -52,28 +52,33 @@ Każdy plik to osobny scenariusz. Jeden plik = jeden feature area.
 
 ---
 
+## Styl pisania testów
+
+Nie dodawaj komentarzy w plikach testowych. Kod powinien być czytelny sam przez się — nazwa testu i nazwy zmiennych wystarczą jako dokumentacja.
+
+```typescript
+// ✗ niepotrzebne
+// ── 1. Logowanie ─────────────────────
+await page.goto("/login");
+
+// ✓ po prostu kod
+await page.goto("/login");
+```
+
 ## Szablon testu
 
 ```typescript
 import { test, expect } from "@playwright/test";
 
 test("krótki opis tego co test weryfikuje", async ({ page }) => {
-  // ── 1. Logowanie ─────────────────────────────────────────────────────────────
   await page.goto("/login");
   await page.fill("#username", "admin");
   await page.fill("#password", "admin123");
   await page.click('button[type="submit"]');
   await page.waitForURL("**/dashboard**");
 
-  // ── 2. Nawigacja ──────────────────────────────────────────────────────────────
   await page.goto("/dashboard/tasks");
   await expect(page.getByRole("button", { name: "Dodaj zadanie" })).toBeVisible();
-
-  // ── 3. Akcja ──────────────────────────────────────────────────────────────────
-  // ...
-
-  // ── 4. Asercja ────────────────────────────────────────────────────────────────
-  // ...
 });
 ```
 

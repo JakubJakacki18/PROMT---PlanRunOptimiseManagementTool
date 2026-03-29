@@ -1,52 +1,39 @@
 import { test, expect } from "@playwright/test";
 
 test("logowanie i dodanie poprawnego finansowania", async ({ page }) => {
-  // 1️ Logowanie
   await page.goto("/login");
   await page.fill("#username", "admin");
   await page.fill("#password", "admin123");
   await page.click('button[type="submit"]');
   await page.waitForURL("**/dashboard**");
 
-  // 2 Zakładka Finansowania
   await page.goto("/dashboard/fundings");
   await expect(page.getByRole("button", { name: "Dodaj finansowanie" })).toBeVisible();
 
-  // 3 Otwórz modal
   await page.getByRole("button", { name: "Dodaj finansowanie" }).click();
   await expect(page.getByRole("heading", { name: "Dodaj finansowanie" })).toBeVisible();
 
-  // 4 Nazwa
   await page.getByPlaceholder("np. NCBR Grant 1/2025").fill("Test Funding");
-
-  // 5 Program i Finansujący
   await page.getByPlaceholder("Program").fill("NCBIR");
   await page.getByPlaceholder("Finansujący").fill("UE");
-
-  // 6 Typ finansowania
   await page.getByRole("combobox", { name: "Typ" }).selectOption({ label: "Grant" });
 
-  // 7 Budżet
   await page.getByRole("button", { name: "Budżet" }).click();
   await page.getByRole("textbox", { name: "250000.00" }).fill("1000");
   await page.getByRole("textbox", { name: "PLN" }).fill("PLN");
 
-  // 8 Daty
   await page.getByRole("button", { name: "Daty" }).click();
   await page.locator('input[name="start_date"]').fill("2026-03-30");
   await page.locator('input[name="end_date"]').fill("2026-04-30");
   await page.locator('input[name="reporting_deadline"]').fill("2026-04-15");
 
-  // 9 Szczegóły
   await page.getByRole("button", { name: "Szczegóły" }).click();
   await page.locator('input[name="agreement_number"]').fill("1500100900");
   await page.locator('textarea[name="description"]').fill("To jest poprawny grant");
 
-  // 10 Zapisz
   await expect(page.getByRole("button", { name: "Dodaj" })).toBeEnabled();
   await page.getByRole("button", { name: "Dodaj" }).click();
 
-  // Modal zamknięty + nowe finansowanie widoczne
   await expect(page.getByRole("heading", { name: "Dodaj finansowanie" })).not.toBeVisible();
   await expect(page.getByText("Test Funding")).toBeVisible();
 });
