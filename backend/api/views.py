@@ -3,7 +3,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
 from django.db.models import Q, Count
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status as http_status
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.permissions import IsAuthenticated
 from .models import (
@@ -24,6 +24,8 @@ from .serializers import (
     TaskAssignmentSerializer,
     UserSerializer,
     UserDetailSerializer,
+    AdminUserCreateSerializer,
+    AdminUserUpdateSerializer,
 )
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -46,12 +48,16 @@ def health(request):
 @permission_classes([permissions.IsAuthenticated])
 def me(request):
     user = request.user
+    profile = getattr(user, "profile", None)
     return Response(
         {
             "id": user.id,
             "username": user.username,
             "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
             "is_staff": user.is_staff,
+            "role": profile.role if profile else "member",
         }
     )
 
@@ -111,6 +117,21 @@ def auth_logout(request):
 # ─────────────────────────────
 class IsAuthenticated(permissions.IsAuthenticated):
     pass
+
+
+class IsAdminOrPM(permissions.BasePermission):
+    """
+    Pozwala na zapis tylko adminom i project managerom (rola z UserProfile).
+    """
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        if request.user.is_staff or request.user.is_superuser:
+            return True
+        profile = getattr(request.user, "profile", None)
+        if profile and profile.role in ("admin", "pm"):
+            return True
+        return False
 
 
 # ─────────────────────────────
@@ -261,12 +282,17 @@ class TaskAssignmentViewSet(viewsets.ModelViewSet):
     filterset_fields = ["task", "user"]
 
 
-class UserViewSet(viewsets.ReadOnlyModelViewSet):
+class UserViewSet(viewsets.ModelViewSet):
     """
-    Do listy userów i szczegółów (karta usera).
+    Pełny CRUD użytkowników.
+    LIST / RETRIEVE — każdy zalogowany.
+    CREATE / UPDATE / DELETE — tylko admin lub PM.
     """
 
-    permission_classes = [IsAuthenticated]
+    def get_permissions(self):
+        if self.action in ("list", "retrieve"):
+            return [IsAuthenticated()]
+        return [IsAdminOrPM()]
 
     def get_queryset(self):
         qs = (
@@ -285,6 +311,16 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         return qs
 
     def get_serializer_class(self):
+        if self.action == "create":
+            return AdminUserCreateSerializer
+        if self.action in ("update", "partial_update"):
+            return AdminUserUpdateSerializer
         if self.action == "retrieve":
             return UserDetailSerializer
         return UserSerializer
+
+    def perform_destroy(self, instance):
+        if instance == self.request.user:
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError("Nie możesz usunąć samego siebie.")
+        instance.delete()

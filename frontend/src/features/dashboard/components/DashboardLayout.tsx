@@ -1,8 +1,13 @@
 import { NavLink, Outlet } from "react-router-dom";
 import HeaderBar from "../../HeaderBar/components/headerBar";
+import { useMeQuery } from "../../auth/authApi";
 import "./DashboardLayout.css";
 
 export default function DashboardLayout() {
+  const { data: me } = useMeQuery();
+  const isAdminOrPM =
+    me?.is_staff || me?.role === "admin" || me?.role === "pm";
+
   return (
     <div className="layout grid grid-cols-[240px_minmax(0,1fr)] min-h-screen bg-slate-50 text-slate-900">
       {/* LEWA KOLUMNA: sidebar */}
@@ -24,6 +29,15 @@ export default function DashboardLayout() {
           <NavLink to="tasks" className={navClass}>
             Zadania
           </NavLink>
+
+          {isAdminOrPM && (
+            <>
+              <div className="sidebar-divider" />
+              <NavLink to="admin" className={navClass} id="sidebar-admin-link">
+                ⚙️ Panel Admina
+              </NavLink>
+            </>
+          )}
         </nav>
       </aside>
 
