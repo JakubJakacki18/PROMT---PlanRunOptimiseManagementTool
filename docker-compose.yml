@@ -30,8 +30,16 @@ services:
     container_name: frontend
     ports:
       - "5173:5173"
+    environment:
+      VITE_API_PROXY_TARGET: http://backend:8000
     networks:
       - my-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:5173 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
 
   backend:
     command: sh -c "python manage.py migrate && python manage.py create_default_super_user && python manage.py runserver 0.0.0.0:8000"
@@ -59,5 +67,36 @@ services:
       ALLOWED_HOSTS: ${ALLOWED_HOSTS}
     networks:
       - my-network
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health/')\""]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  playwright:
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile.playwright
+    container_name: playwright_tests
+    profiles:
+      - test
+    depends_on:
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    environment:
+      PLAYWRIGHT_BASE_URL: http://frontend:5173
+      DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD}
+      CI: "true"
+    networks:
+      - my-network
+    volumes:
+      - ./frontend/playwright-report:/app/playwright-report
+      - ./frontend/test-results:/app/test-results
+    command: npx playwright test --reporter=list
+
 volumes:
   postgres_data:
