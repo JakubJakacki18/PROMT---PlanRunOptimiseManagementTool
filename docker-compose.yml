@@ -64,7 +64,7 @@ services:
       DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD}
       SECRET_KEY: ${SECRET_KEY}
       DEBUG: ${DEBUG}
-      ALLOWED_HOSTS: ${ALLOWED_HOSTS},backend,frontend
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
     networks:
       - my-network
     healthcheck:
@@ -93,6 +93,7 @@ services:
     volumes:
       - ./frontend/playwright-report:/app/playwright-report
       - ./frontend/test-results:/app/test-results
+    command: npx playwright test --reporter=list
 
 volumes:
   postgres_data:
