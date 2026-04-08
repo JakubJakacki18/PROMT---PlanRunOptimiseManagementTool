@@ -317,7 +317,7 @@ export default function AddFundingModal({
                                                 id="start_date"
                                                 type="date"
                                                 className="form-input"
-                                                {...register("start_date")}
+                                                {...register("start_date", {deps: ["end_date"]})}
                                             />
                                         </div>
 
@@ -330,7 +330,7 @@ export default function AddFundingModal({
                                                     errors.end_date ? "input-invalid" : ""
                                                 }`}
                                                 aria-invalid={!!errors.end_date}
-                                                {...register("end_date")}
+                                                {...register("end_date", {deps: ["start_date"]})}
                                             />
                                             {errors.end_date && (
                                                 <p className="error-text">

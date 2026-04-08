@@ -20,12 +20,12 @@ test("logowanie i usunięcie finansowania", async ({page}) => {
     await page.locator('input[name="start_date"]').fill("2026-03-30");
     await page.locator('input[name="end_date"]').fill("2026-04-30");
 
-    await page.getByRole("button", {name: "Dodaj"}).click();
+    await page.getByRole("button", {name: "Dodaj", exact: true}).click();
     await expect(page.getByText(fundingName)).toBeVisible();
 
     page.once("dialog", (dialog) => dialog.accept());
 
-    const row = page.locator("tr", {hasText: fundingName});
+    const row = page.locator(".task-card", {hasText: fundingName});
     await row.getByRole("button", {name: "Usuń"}).click();
 
     await expect(page.getByText(fundingName)).not.toBeVisible();
