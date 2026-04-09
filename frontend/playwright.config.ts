@@ -23,9 +23,24 @@ export default defineConfig({
   },
 
   projects: [
+    // ── Projekt setup: logowanie i zapis storageState ──
+    // Uruchamia się PRZED testami i zapisuje stan sesji do pliku.
+    // Patrz: https://playwright.dev/docs/auth#basic-shared-account-in-all-tests
+    {
+      name: "setup",
+      testMatch: /.*\.setup\.ts/,
+    },
+
+    // ── Projekt testowy: korzysta z gotowej sesji ──
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        // Używa zapisanego stanu auth — testy startują już zalogowane
+        storageState: "playwright/.auth/admin.json",
+      },
+      // Zależność: najpierw uruchom setup (logowanie)
+      dependencies: ["setup"],
     },
   ],
 

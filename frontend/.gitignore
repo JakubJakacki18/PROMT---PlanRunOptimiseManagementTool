@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Playwright auth state (sensitive cookies/sessions)
+playwright/.auth
+test-results
+playwright-report

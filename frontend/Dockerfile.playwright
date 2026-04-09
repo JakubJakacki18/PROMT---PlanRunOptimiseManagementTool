@@ -16,5 +16,8 @@ RUN npm install --save-dev @playwright/test
 COPY playwright.config.ts ./
 COPY e2e/ ./e2e/
 
+# Tworzymy katalog na stan uwierzytelnienia (storageState)
+RUN mkdir -p playwright/.auth
+
 # Domyślna komenda
 CMD ["npx", "playwright", "test", "--reporter=list"]
