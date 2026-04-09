@@ -32,10 +32,11 @@ services:
       - "5173:5173"
     environment:
       VITE_API_PROXY_TARGET: http://backend:8000
+      VITE_API_URL: ""
     networks:
       - my-network
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:5173 || exit 1"]
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:5173 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 20
