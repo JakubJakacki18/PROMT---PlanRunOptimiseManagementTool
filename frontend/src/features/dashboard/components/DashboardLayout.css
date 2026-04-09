@@ -53,3 +53,10 @@
 .dashboard__content {
   padding: 24px;
 }
+
+/* Sidebar divider for admin section */
+.sidebar-divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 12px 0;
+}
