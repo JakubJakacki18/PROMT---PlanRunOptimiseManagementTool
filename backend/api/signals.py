@@ -2,8 +2,9 @@ from django.db import transaction
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils import timezone
+from django.conf import settings
 from datetime import timedelta
-from .models import ProjectFunding, FundingTask, Task, TaskScope
+from .models import ProjectFunding, FundingTask, Task, TaskScope, UserProfile
 
 
 def _due(base_date, delta_days):
@@ -88,3 +89,18 @@ def delete_scoped_tasks_on_unlink(sender, instance: ProjectFunding, **kwargs):
         scope__project_funding=instance,
         scope__funding_scoped=True,
     ).delete()
+
+
+# ─────────────────────────────
+# Auto-create UserProfile
+# ─────────────────────────────
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    """Auto-tworzy UserProfile dla każdego nowego usera."""
+    if created:
+        UserProfile.objects.get_or_create(user=instance)
