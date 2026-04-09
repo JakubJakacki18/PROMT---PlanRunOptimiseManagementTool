@@ -289,6 +289,8 @@ class UserViewSet(viewsets.ModelViewSet):
     CREATE / UPDATE / DELETE — tylko admin lub PM.
     """
 
+    pagination_class = None
+
     def get_permissions(self):
         if self.action in ("list", "retrieve"):
             return [IsAuthenticated()]
