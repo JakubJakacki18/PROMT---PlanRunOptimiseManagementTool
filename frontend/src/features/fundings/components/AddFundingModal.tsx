@@ -1,417 +1,422 @@
-import { useEffect, useMemo, useState } from "react";
+import {useEffect, useMemo, useState} from "react";
 import {
-  useForm,
-  type FieldErrors,
-  type Path,
-  type Resolver,
+    useForm,
+    type FieldErrors,
+    type Path,
+    type Resolver,
 } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import type { FundingCreate, FundingType } from "../../types/funding";
+import {z} from "zod";
+import {zodResolver} from "@hookform/resolvers/zod";
+import type {FundingCreate, FundingType} from "../../types/funding";
 import "./FundingModal.css";
 
 const emptyToNull = (v?: string | null) =>
-  v == null || v.trim() === "" ? null : v;
+    v == null || v.trim() === "" ? null : v;
 
 const FundingCreateSchema = z
-  .object({
-    name: z.string().trim().min(2, "Nazwa musi mieć min. 2 znaki"),
-    program: z.string().optional(),
-    funder: z.string().optional(),
+    .object({
+        name: z.string().trim().min(2, "Nazwa musi mieć min. 2 znaki"),
+        program: z.string().optional(),
+        funder: z.string().optional(),
 
-    amount_total: z
-      .string()
-      .optional()
-      .refine(
-        (v) => v === undefined || v === "" || /^\d+(?:[.,]\d{1,2})?$/.test(v),
-        "Kwota musi być liczbą (max 2 miejsca po przecinku)"
-      ),
-    currency: z
-      .string()
-      .optional()
-      .refine((v) => !v || v.length === 3, "Waluta musi mieć 3 znaki"),
+        amount_total: z
+            .string()
+            .optional()
+            .refine(
+                (v) => v === undefined || v === "" || /^\d+(?:[.,]\d{1,2})?$/.test(v),
+                "Kwota musi być liczbą (max 2 miejsca po przecinku)"
+            ),
+        currency: z
+            .string()
+            .optional()
+            .refine((v) => !v || v.length === 3, "Waluta musi mieć 3 znaki"),
 
-    start_date: z.string().optional(),
-    end_date: z.string().optional(),
-    reporting_deadline: z.string().optional(),
+        start_date: z.string().optional(),
+        end_date: z.string().optional(),
+        reporting_deadline: z.string().optional(),
 
-    agreement_number: z.string().optional(),
-    description: z.string().optional(),
+        agreement_number: z.string().optional(),
+        description: z.string().optional(),
 
-    type: z.enum(["grant", "sponsorship", "donation", "internal"]).optional(),
-  })
-  .superRefine((data, ctx) => {
-    if (data.start_date && data.end_date && data.start_date > data.end_date) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["end_date"],
-        message: "Data końcowa nie może być wcześniejsza niż start",
-      });
-    }
-  });
+        type: z.enum(["grant", "sponsorship", "donation", "internal"]).optional(),
+    })
+    .superRefine((data, ctx) => {
+        if (data.start_date && data.end_date && data.start_date > data.end_date) {
+            ctx.addIssue({
+                code: "custom",
+                path: ["end_date"],
+                message: "Data końcowa nie może być wcześniejsza niż start",
+            });
+        }
+    });
 
 type FormValues = z.infer<typeof FundingCreateSchema>;
 
 export interface AddFundingModalProps {
-  open: boolean;
-  onClose: () => void;
-  onSubmit: (payload: FundingCreate) => Promise<void> | void;
-  defaultType?: FundingType;
+    open: boolean;
+    onClose: () => void;
+    onSubmit: (payload: FundingCreate) => Promise<void> | void;
+    defaultType?: FundingType;
 }
 
 export default function AddFundingModal({
-  open,
-  onClose,
-  onSubmit,
-  defaultType,
-}: AddFundingModalProps) {
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setFocus,
-    watch,
-    formState: { errors, isSubmitting, isValid },
-  } = useForm<FormValues>({
-    resolver: zodResolver(FundingCreateSchema) as Resolver<FormValues>,
-    mode: "onChange",
-    defaultValues: {
-      name: "",
-      program: "",
-      funder: "",
-      amount_total: "",
-      currency: "PLN",
-      start_date: "",
-      end_date: "",
-      reporting_deadline: "",
-      agreement_number: "",
-      description: "",
-      type: defaultType,
-    },
-  });
+                                            open,
+                                            onClose,
+                                            onSubmit,
+                                            defaultType,
+                                        }: AddFundingModalProps) {
+    const {
+        register,
+        handleSubmit,
+        reset,
+        setFocus,
+        watch,
+        formState: {errors, isSubmitting, isValid},
+    } = useForm<FormValues>({
+        resolver: zodResolver(FundingCreateSchema) as Resolver<FormValues>,
+        mode: "onChange",
+        defaultValues: {
+            name: "",
+            program: "",
+            funder: "",
+            amount_total: "",
+            currency: "PLN",
+            start_date: "",
+            end_date: "",
+            reporting_deadline: "",
+            agreement_number: "",
+            description: "",
+            type: defaultType,
+        },
+    });
 
-  const [generalOpen, setGeneralOpen] = useState(true);
-  const [budgetOpen, setBudgetOpen] = useState(false);
-  const [datesOpen, setDatesOpen] = useState(false);
-  const [detailsOpen, setDetailsOpen] = useState(false);
+    const [generalOpen, setGeneralOpen] = useState(true);
+    const [budgetOpen, setBudgetOpen] = useState(false);
+    const [datesOpen, setDatesOpen] = useState(false);
+    const [detailsOpen, setDetailsOpen] = useState(false);
 
-  useEffect(() => {
-    if (!open) return;
-    setGeneralOpen(true);
-    setBudgetOpen(false);
-    setDatesOpen(false);
-    setDetailsOpen(false);
-  }, [open]);
+    useEffect(() => {
+        if (!open) return;
+        setGeneralOpen(true);
+        setBudgetOpen(false);
+        setDatesOpen(false);
+        setDetailsOpen(false);
+    }, [open]);
 
-  const closeAndReset = () => {
-    reset();
-    onClose();
-  };
-
-  const submit = async (values: FormValues) => {
-    const payload: FundingCreate = {
-      name: values.name.trim(),
-      program: emptyToNull(values.program),
-      funder: emptyToNull(values.funder),
-      amount_total: values.amount_total ? values.amount_total : null,
-      currency: values.currency || "PLN",
-      start_date: emptyToNull(values.start_date),
-      end_date: emptyToNull(values.end_date),
-      reporting_deadline: emptyToNull(values.reporting_deadline),
-      agreement_number: emptyToNull(values.agreement_number),
-      description: emptyToNull(values.description),
-      type: values.type,
+    const closeAndReset = () => {
+        reset();
+        onClose();
     };
 
-    await onSubmit(payload);
-    closeAndReset();
-  };
+    const submit = async (values: FormValues) => {
+        const payload: FundingCreate = {
+            name: values.name.trim(),
+            program: emptyToNull(values.program),
+            funder: emptyToNull(values.funder),
+            amount_total: values.amount_total ? values.amount_total : null,
+            currency: values.currency || "PLN",
+            start_date: emptyToNull(values.start_date),
+            end_date: emptyToNull(values.end_date),
+            reporting_deadline: emptyToNull(values.reporting_deadline),
+            agreement_number: emptyToNull(values.agreement_number),
+            description: emptyToNull(values.description),
+            type: values.type,
+        };
 
-  const onInvalid = (errs: FieldErrors<FormValues>) => {
-    const order: Path<FormValues>[] = [
-      "name",
-      "type",
-      "amount_total",
-      "currency",
-      "start_date",
-      "end_date",
-      "reporting_deadline",
-      "agreement_number",
-    ];
-    const first = order.find((k) => errs[k]);
-    if (first) setFocus(first);
-  };
+        await onSubmit(payload);
+        closeAndReset();
+    };
 
-  const hasDetails = useMemo(() => {
-    const d = watch("description");
-    const a = watch("agreement_number");
-    return !!(d?.trim() || a?.trim());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [watch("description"), watch("agreement_number")]);
+    const onInvalid = (errs: FieldErrors<FormValues>) => {
+        const order: Path<FormValues>[] = [
+            "name",
+            "type",
+            "amount_total",
+            "currency",
+            "start_date",
+            "end_date",
+            "reporting_deadline",
+            "agreement_number",
+        ];
+        const first = order.find((k) => errs[k]);
+        if (first) setFocus(first);
+    };
 
-  if (!open) return null;
+    const hasDetails = useMemo(() => {
+        const d = watch("description");
+        const a = watch("agreement_number");
+        return !!(d?.trim() || a?.trim());
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [watch("description"), watch("agreement_number")]);
 
-  return (
-    <div className="modal-overlay funding-modal" onClick={closeAndReset}>
-      <div className="modal-window" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <div className="modal-head-left">
-            <h2 className="modal-title">Dodaj finansowanie</h2>
-            <div className="modal-subtitle">Uzupełnij dane i zapisz</div>
-          </div>
-          <button
-            className="icon-btn"
-            onClick={closeAndReset}
-            type="button"
-            aria-label="Zamknij"
-          >
-            ✕
-          </button>
-        </div>
+    if (!open) return null;
 
-        <form className="modal-form" onSubmit={handleSubmit(submit, onInvalid)}>
-          <div className="modal-body">
-            {/* OGÓLNE */}
-            <div className="accordion">
-              <button
-                type="button"
-                className="acc-trigger"
-                onClick={() => setGeneralOpen((s) => !s)}
-              >
+    return (
+        <div className="modal-overlay funding-modal" onClick={closeAndReset}>
+            <div className="modal-window" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-header">
+                    <div className="modal-head-left">
+                        <h2 className="modal-title">Dodaj finansowanie</h2>
+                        <div className="modal-subtitle">Uzupełnij dane i zapisz</div>
+                    </div>
+                    <button
+                        className="icon-btn"
+                        onClick={closeAndReset}
+                        type="button"
+                        aria-label="Zamknij"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                <form className="modal-form" onSubmit={handleSubmit(submit, onInvalid)}>
+                    <div className="modal-body">
+                        {/* OGÓLNE */}
+                        <div className="accordion">
+                            <button
+                                type="button"
+                                className="acc-trigger"
+                                onClick={() => setGeneralOpen((s) => !s)}
+                            >
                 <span className="acc-left">
                   <span className="acc-title">Ogólne</span>
                 </span>
-                <span className="acc-right" aria-hidden>
+                                <span className="acc-right" aria-hidden>
                   {generalOpen ? "−" : "+"}
                 </span>
-              </button>
+                            </button>
 
-              {generalOpen && (
-                <div className="acc-body">
-                  <div className="field">
-                    <label className="form-label">Nazwa</label>
-                    <input
-                      className={`form-input ${
-                        errors.name ? "input-invalid" : ""
-                      }`}
-                      aria-invalid={!!errors.name}
-                      {...register("name")}
-                      placeholder="np. NCBR Grant 1/2025"
-                    />
-                    {errors.name && (
-                      <p className="error-text">
-                        {String(errors.name.message)}
-                      </p>
-                    )}
-                  </div>
+                            {generalOpen && (
+                                <div className="acc-body">
+                                    <div className="field">
+                                        <label className="form-label" htmlFor="name">Nazwa</label>
+                                        <input
+                                            id="name"
+                                            className={`form-input ${
+                                                errors.name ? "input-invalid" : ""
+                                            }`}
+                                            aria-invalid={!!errors.name}
+                                            {...register("name")}
+                                            placeholder="np. NCBR Grant 1/2025"
+                                        />
+                                        {errors.name && (
+                                            <p className="error-text">
+                                                {String(errors.name.message)}
+                                            </p>
+                                        )}
+                                    </div>
 
-                  <div className="grid-2 mt-10">
-                    <div className="field">
-                      <label className="form-label">Program</label>
-                      <input className="form-input" {...register("program")} />
-                    </div>
-                    <div className="field">
-                      <label className="form-label">Finansujący</label>
-                      <input className="form-input" {...register("funder")} />
-                    </div>
-                  </div>
+                                    <div className="grid-2 mt-10">
+                                        <div className="field">
+                                            <label className="form-label" htmlFor="program">Program</label>
+                                            <input className="form-input" id="program" {...register("program")} />
+                                        </div>
+                                        <div className="field">
+                                            <label className="form-label" htmlFor="funder">Finansujący</label>
+                                            <input className="form-input" id="funder" {...register("funder")} />
+                                        </div>
+                                    </div>
 
-                  <div className="field mt-10">
-                    <label className="form-label">Typ</label>
-                    <select className="form-select" {...register("type")}>
-                      <option value="">Wybierz…</option>
-                      <option value="grant">Grant</option>
-                      <option value="sponsorship">Sponsorowanie</option>
-                      <option value="donation">Darowizna</option>
-                      <option value="internal">Wewnętrzne</option>
-                    </select>
-                  </div>
-                </div>
-              )}
-            </div>
+                                    <div className="field mt-10">
+                                        <label className="form-label" htmlFor="type">Typ</label>
+                                        <select className="form-select" id="type" {...register("type")}>
+                                            <option value="">Wybierz…</option>
+                                            <option value="grant">Grant</option>
+                                            <option value="sponsorship">Sponsorowanie</option>
+                                            <option value="donation">Darowizna</option>
+                                            <option value="internal">Wewnętrzne</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
 
-            {/* BUDŻET */}
-            <div className="accordion">
-              <button
-                type="button"
-                className="acc-trigger"
-                onClick={() => setBudgetOpen((s) => !s)}
-              >
+                        {/* BUDŻET */}
+                        <div className="accordion">
+                            <button
+                                type="button"
+                                className="acc-trigger"
+                                onClick={() => setBudgetOpen((s) => !s)}
+                            >
                 <span className="acc-left">
                   <span className="acc-title">Budżet</span>
                 </span>
-                <span className="acc-right" aria-hidden>
+                                <span className="acc-right" aria-hidden>
                   {budgetOpen ? "−" : "+"}
                 </span>
-              </button>
+                            </button>
 
-              {budgetOpen && (
-                <div className="acc-body">
-                  <div className="grid-3">
-                    <div className="field">
-                      <label className="form-label">Kwota</label>
-                      <input
-                        className={`form-input ${
-                          errors.amount_total ? "input-invalid" : ""
-                        }`}
-                        aria-invalid={!!errors.amount_total}
-                        {...register("amount_total")}
-                        inputMode="decimal"
-                        placeholder="250000.00"
-                      />
-                      {errors.amount_total && (
-                        <p className="error-text">
-                          {String(errors.amount_total.message)}
-                        </p>
-                      )}
-                    </div>
+                            {budgetOpen && (
+                                <div className="acc-body">
+                                    <div className="grid-3">
+                                        <div className="field">
+                                            <label className="form-label" htmlFor="amount_total">Kwota</label>
+                                            <input id="amount_total"
+                                                   className={`form-input ${
+                                                       errors.amount_total ? "input-invalid" : ""
+                                                   }`}
+                                                   aria-invalid={!!errors.amount_total}
+                                                   {...register("amount_total")}
+                                                   inputMode="decimal"
+                                                   placeholder="250000.00"
+                                            />
+                                            {errors.amount_total && (
+                                                <p className="error-text">
+                                                    {String(errors.amount_total.message)}
+                                                </p>
+                                            )}
+                                        </div>
 
-                    <div className="field">
-                      <label className="form-label">Waluta</label>
-                      <input
-                        className={`form-input ${
-                          errors.currency ? "input-invalid" : ""
-                        }`}
-                        aria-invalid={!!errors.currency}
-                        {...register("currency")}
-                        maxLength={3}
-                        placeholder="PLN"
-                      />
-                      {errors.currency && (
-                        <p className="error-text">
-                          {String(errors.currency.message)}
-                        </p>
-                      )}
-                    </div>
+                                        <div className="field">
+                                            <label className="form-label" htmlFor="currency">Waluta</label>
+                                            <input id="currency"
+                                                   className={`form-input ${
+                                                       errors.currency ? "input-invalid" : ""
+                                                   }`}
+                                                   aria-invalid={!!errors.currency}
+                                                   {...register("currency")}
+                                                   maxLength={3}
+                                                   placeholder="PLN"
+                                            />
+                                            {errors.currency && (
+                                                <p className="error-text">
+                                                    {String(errors.currency.message)}
+                                                </p>
+                                            )}
+                                        </div>
 
-                    <div className="callout">
-                      <b>Tip:</b> kropka lub przecinek.
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+                                        <div className="callout">
+                                            <b>Tip:</b> kropka lub przecinek.
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
 
-            {/* DATY*/}
-            <div className="accordion">
-              <button
-                type="button"
-                className="acc-trigger"
-                onClick={() => setDatesOpen((s) => !s)}
-              >
+                        {/* DATY*/}
+                        <div className="accordion">
+                            <button
+                                type="button"
+                                className="acc-trigger"
+                                onClick={() => setDatesOpen((s) => !s)}
+                            >
                 <span className="acc-left">
                   <span className="acc-title">Daty</span>
                 </span>
-                <span className="acc-right" aria-hidden>
+                                <span className="acc-right" aria-hidden>
                   {datesOpen ? "−" : "+"}
                 </span>
-              </button>
+                            </button>
 
-              {datesOpen && (
-                <div className="acc-body">
-                  <div className="grid-3-dates">
-                    <div className="field">
-                      <label className="form-label">Start</label>
-                      <input
-                        type="date"
-                        className="form-input"
-                        {...register("start_date")}
-                      />
-                    </div>
+                            {datesOpen && (
+                                <div className="acc-body">
+                                    <div className="grid-3-dates">
+                                        <div className="field">
+                                            <label className="form-label" htmlFor="start_date">Start</label>
+                                            <input
+                                                id="start_date"
+                                                type="date"
+                                                className="form-input"
+                                                {...register("start_date", {deps: ["end_date"]})}
+                                            />
+                                        </div>
 
-                    <div className="field">
-                      <label className="form-label">Koniec</label>
-                      <input
-                        type="date"
-                        className={`form-input ${
-                          errors.end_date ? "input-invalid" : ""
-                        }`}
-                        aria-invalid={!!errors.end_date}
-                        {...register("end_date")}
-                      />
-                      {errors.end_date && (
-                        <p className="error-text">
-                          {String(errors.end_date.message)}
-                        </p>
-                      )}
-                    </div>
+                                        <div className="field">
+                                            <label className="form-label" htmlFor="end_date">Koniec</label>
+                                            <input
+                                                id="end_date"
+                                                type="date"
+                                                className={`form-input ${
+                                                    errors.end_date ? "input-invalid" : ""
+                                                }`}
+                                                aria-invalid={!!errors.end_date}
+                                                {...register("end_date", {deps: ["start_date"]})}
+                                            />
+                                            {errors.end_date && (
+                                                <p className="error-text">
+                                                    {String(errors.end_date.message)}
+                                                </p>
+                                            )}
+                                        </div>
 
-                    <div className="field">
-                      <label className="form-label">Termin raportu</label>
-                      <input
-                        type="date"
-                        className="form-input"
-                        {...register("reporting_deadline")}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+                                        <div className="field">
+                                            <label className="form-label" htmlFor="reporting_deadline">Termin
+                                                raportu</label>
+                                            <input
+                                                id="reporting_deadline"
+                                                type="date"
+                                                className="form-input"
+                                                {...register("reporting_deadline")}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
 
-            {/* SZCZEGÓŁY */}
-            <div className="accordion">
-              <button
-                type="button"
-                className="acc-trigger"
-                onClick={() => setDetailsOpen((s) => !s)}
-              >
+                        {/* SZCZEGÓŁY */}
+                        <div className="accordion">
+                            <button
+                                type="button"
+                                className="acc-trigger"
+                                onClick={() => setDetailsOpen((s) => !s)}
+                            >
                 <span className="acc-left">
                   <span className="acc-title">Szczegóły</span>
-                  {hasDetails && <span className="acc-dot" aria-hidden />}
+                    {hasDetails && <span className="acc-dot" aria-hidden/>}
                 </span>
-                <span className="acc-right" aria-hidden>
+                                <span className="acc-right" aria-hidden>
                   {detailsOpen ? "−" : "+"}
                 </span>
-              </button>
+                            </button>
 
-              {detailsOpen && (
-                <div className="acc-body">
-                  <div className="grid-2">
-                    <div className="field">
-                      <label className="form-label">Nr umowy</label>
-                      <input
-                        className="form-input"
-                        {...register("agreement_number")}
-                      />
+                            {detailsOpen && (
+                                <div className="acc-body">
+                                    <div className="grid-2">
+                                        <div className="field">
+                                            <label className="form-label">Nr umowy</label>
+                                            <input
+                                                className="form-input"
+                                                {...register("agreement_number")}
+                                            />
+                                        </div>
+
+                                        <div className="callout">
+                                            <b>Info:</b> jeśli brak — zostaw puste.
+                                        </div>
+                                    </div>
+
+                                    <div className="field mt-10">
+                                        <label className="form-label">Opis</label>
+                                        <textarea
+                                            className="form-textarea textarea-compact"
+                                            rows={2}
+                                            {...register("description")}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
-                    <div className="callout">
-                      <b>Info:</b> jeśli brak — zostaw puste.
+                    <div className="modal-footer">
+                        <button
+                            type="button"
+                            className="btn-secondary"
+                            onClick={closeAndReset}
+                        >
+                            Anuluj
+                        </button>
+                        <button
+                            type="submit"
+                            className="btn-primary"
+                            disabled={!isValid || isSubmitting}
+                        >
+                            {isSubmitting ? "Zapisywanie…" : "Dodaj"}
+                        </button>
                     </div>
-                  </div>
-
-                  <div className="field mt-10">
-                    <label className="form-label">Opis</label>
-                    <textarea
-                      className="form-textarea textarea-compact"
-                      rows={2}
-                      {...register("description")}
-                    />
-                  </div>
-                </div>
-              )}
+                </form>
             </div>
-          </div>
-
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={closeAndReset}
-            >
-              Anuluj
-            </button>
-            <button
-              type="submit"
-              className="btn-primary"
-              disabled={!isValid || isSubmitting}
-            >
-              {isSubmitting ? "Zapisywanie…" : "Dodaj"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
+        </div>
+    );
 }
