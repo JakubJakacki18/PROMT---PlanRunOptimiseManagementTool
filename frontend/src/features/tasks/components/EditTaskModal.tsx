@@ -32,7 +32,7 @@ export interface EditTaskModalProps {
   onClose: () => void;
   onSubmit: (
     id: number,
-    patch: Partial<CreateTaskPayload>
+    patch: Partial<CreateTaskPayload>,
   ) => Promise<void> | void;
 }
 
@@ -150,8 +150,8 @@ export default function EditTaskModal({
     const scope: Scope = task.scope_project
       ? "project"
       : task.scope_funding
-      ? "funding"
-      : "unassigned";
+        ? "funding"
+        : "unassigned";
 
     reset({
       title: task.title ?? "",
@@ -529,7 +529,7 @@ export default function EditTaskModal({
                         value={assigneeIds.map(String)}
                         onChange={(e) => {
                           const selected = Array.from(
-                            e.target.selectedOptions
+                            e.target.selectedOptions,
                           ).map((opt) => Number(opt.value));
                           setAssigneeIds(selected);
                         }}

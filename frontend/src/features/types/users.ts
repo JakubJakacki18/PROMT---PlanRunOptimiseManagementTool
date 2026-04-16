@@ -1,4 +1,3 @@
-
 export type UserRole = "pm" | "member" | "viewer" | "admin";
 
 export interface UserProfile {

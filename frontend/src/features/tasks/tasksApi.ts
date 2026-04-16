@@ -2,7 +2,12 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "../../app/axiosBaseQuery";
 import type { Task, CreateTaskPayload } from "./types";
 
-type Paged<T> = { count: number; next: string | null; previous: string | null; results: T[] };
+type Paged<T> = {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+};
 export type TasksListParams = {
   project?: number;
   funding?: number;
@@ -10,7 +15,13 @@ export type TasksListParams = {
   funding_scoped?: string;
   unassigned?: boolean;
   status?: "todo" | "doing" | "done";
-  ordering?: "-created_at" | "created_at" | "due_date" | "-due_date" | "priority" | "-priority";
+  ordering?:
+    | "-created_at"
+    | "created_at"
+    | "due_date"
+    | "-due_date"
+    | "priority"
+    | "-priority";
   page?: number;
   search?: string;
   priority?: "1" | "2" | "3";
@@ -25,8 +36,10 @@ export const tasksApi = createApi({
     listTasks: b.query<Paged<Task>, TasksListParams | void>({
       query: (params) => {
         const p = new URLSearchParams();
-        if (params && params.project != null) p.set("project", String(params.project));
-        if (params && params.funding != null) p.set("funding", String(params.funding));
+        if (params && params.project != null)
+          p.set("project", String(params.project));
+        if (params && params.funding != null)
+          p.set("funding", String(params.funding));
         if (params && params.unassigned) p.set("unassigned", "true");
         if (params && params.status) p.set("status", params.status);
         if (params && params.ordering) p.set("ordering", params.ordering);
@@ -55,26 +68,31 @@ export const tasksApi = createApi({
         url: `/api/tasks/${id}/`,
         method: "DELETE",
       }),
-      invalidatesTags: [{type: "Task", id: "LIST"}],
+      invalidatesTags: [{ type: "Task", id: "LIST" }],
     }),
-    updateTask: b.mutation<Task, {id: number, patch: Partial<CreateTaskPayload>}>({
-      query: ({ id, patch}) => ({
+    updateTask: b.mutation<
+      Task,
+      { id: number; patch: Partial<CreateTaskPayload> }
+    >({
+      query: ({ id, patch }) => ({
         url: `/api/tasks/${id}/`,
         method: "PATCH",
         data: patch,
       }),
-      invalidatesTags: [{type: "Task", id: "LIST"}],
+      invalidatesTags: [{ type: "Task", id: "LIST" }],
     }),
 
     // LEKKIE LISTY DO SELECTÓW (nazwa + id)
     pickProjects: b.query<{ id: number; name: string }[], void>({
       query: () => ({ url: "/api/projects/?ordering=name&page_size=100" }),
-      transformResponse: (data: Paged<{ id: number; name: string }>) => data.results,
+      transformResponse: (data: Paged<{ id: number; name: string }>) =>
+        data.results,
       providesTags: ["ProjectPick"],
     }),
     pickFundings: b.query<{ id: number; name: string }[], void>({
       query: () => ({ url: "/api/fundings/?ordering=name&page_size=100" }),
-      transformResponse: (data: Paged<{ id: number; name: string }>) => data.results,
+      transformResponse: (data: Paged<{ id: number; name: string }>) =>
+        data.results,
       providesTags: ["FundingPick"],
     }),
   }),

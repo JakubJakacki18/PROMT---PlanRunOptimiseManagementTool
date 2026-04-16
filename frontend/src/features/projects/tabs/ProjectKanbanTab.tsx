@@ -67,7 +67,7 @@ function ResizableKanbanGrid({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [widths, setWidths] = useState<number[]>([]);
   const dragging = useRef<null | { i: 0 | 1; startX: number; start: number[] }>(
-    null
+    null,
   );
 
   useLayoutEffect(() => {
@@ -87,7 +87,7 @@ function ResizableKanbanGrid({
       const newTotal = el.clientWidth - gapPx * 2;
       const ratio = newTotal / Math.max(1, oldTotal);
       setWidths((prev) =>
-        prev.map((w) => Math.max(minPx, Math.floor(w * ratio)))
+        prev.map((w) => Math.max(minPx, Math.floor(w * ratio))),
       );
     }
     window.addEventListener("resize", onResize);
@@ -178,7 +178,7 @@ export default function ProjectKanbanTab() {
 
   const queryArg = useMemo(
     () => ({ project: project.id, ordering: "-priority" as const }),
-    [project.id]
+    [project.id],
   );
   const { data, isLoading, isFetching } = useListTasksQuery(queryArg);
 
@@ -277,7 +277,7 @@ export default function ProjectKanbanTab() {
 
   function togglePriority(p: Priority) {
     setSelectedPriorities((prev) =>
-      prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]
+      prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p],
     );
   }
   function clearPriorities() {
@@ -304,7 +304,7 @@ export default function ProjectKanbanTab() {
 
       const insertAt = Math.min(
         Math.max(destination.index, 0),
-        next[dstCol].length
+        next[dstCol].length,
       );
       next[dstCol].splice(insertAt, 0, taskId);
 
@@ -326,7 +326,7 @@ export default function ProjectKanbanTab() {
           const idx = items.findIndex((t) => t.id === taskId);
           if (idx === -1) return;
           items[idx] = { ...items[idx], status: dstCol };
-        })
+        }),
       );
     }
 
@@ -526,8 +526,8 @@ function StatusChip({ status }: { status: ColKey }) {
     status === "done"
       ? "chip--green"
       : status === "doing"
-      ? "chip--amber"
-      : "chip--gray";
+        ? "chip--amber"
+        : "chip--gray";
 
   return <span className={`chip ${cls}`}>{STATUS_LABEL_PL[status]}</span>;
 }

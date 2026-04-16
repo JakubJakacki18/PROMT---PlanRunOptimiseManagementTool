@@ -193,7 +193,7 @@ export default function ProjectTeamTab() {
   const { data: users = [], isLoading: usersLoading } = useListUsersQuery();
   const { data: tasksData, isFetching: tasksFetching } = useListTasksQuery(
     { project: project.id },
-    { refetchOnFocus: true }
+    { refetchOnFocus: true },
   );
 
   const tasks: Task[] = useMemo(() => tasksData?.results ?? [], [tasksData]);
@@ -298,7 +298,7 @@ export default function ProjectTeamTab() {
   /* ===== selection helpers ===== */
   function toggleSelect(id: number) {
     setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   }
 
@@ -315,8 +315,8 @@ export default function ProjectTeamTab() {
     selectedIds.length === 0
       ? "none"
       : selectedIds.length === 1
-      ? "single"
-      : "multi";
+        ? "single"
+        : "multi";
 
   const selectedPeople = useMemo(() => {
     const map = new Map<number, PersonKpi>();
@@ -365,9 +365,9 @@ export default function ProjectTeamTab() {
       const assignees = t.assignees ?? [];
       const owner =
         selectionMode === "single"
-          ? assignees.find((u) => u.id === (singlePerson?.user.id ?? -1)) ??
-            null
-          : assignees.find((u) => ids.has(u.id)) ?? null;
+          ? (assignees.find((u) => u.id === (singlePerson?.user.id ?? -1)) ??
+            null)
+          : (assignees.find((u) => ids.has(u.id)) ?? null);
 
       if (!owner) continue;
 
@@ -431,7 +431,7 @@ export default function ProjectTeamTab() {
       : peopleKpis.filter((p) => p.total > 0).slice(0, 10);
 
     const sorted = [...rows].sort(
-      (a, b) => b.todo + b.doing - (a.todo + a.doing)
+      (a, b) => b.todo + b.doing - (a.todo + a.doing),
     );
 
     if (taskFilter === "todo") {
@@ -490,8 +490,8 @@ export default function ProjectTeamTab() {
           const idx = arr.findIndex((t) => t.id === id);
           if (idx !== -1)
             arr[idx] = { ...(arr[idx] as Task), ...patch } as Task;
-        }
-      )
+        },
+      ),
     );
   }
 
@@ -769,7 +769,7 @@ export default function ProjectTeamTab() {
                           1,
                           ...peopleKpis
                             .filter((x) => x.total > 0)
-                            .map((x) => x.todo + x.doing)
+                            .map((x) => x.todo + x.doing),
                         );
                         const w = Math.round((open / max) * 100);
                         return (
@@ -989,8 +989,8 @@ export default function ProjectTeamTab() {
                                   (t.status === "done"
                                     ? "ok"
                                     : t.status === "doing"
-                                    ? "info"
-                                    : "muted")
+                                      ? "info"
+                                      : "muted")
                                 }
                               >
                                 {t.status}
@@ -1211,8 +1211,8 @@ export default function ProjectTeamTab() {
                                 (t.status === "done"
                                   ? "ok"
                                   : t.status === "doing"
-                                  ? "info"
-                                  : "muted")
+                                    ? "info"
+                                    : "muted")
                               }
                             >
                               {t.status}
@@ -1365,8 +1365,8 @@ export default function ProjectTeamTab() {
                 (hoverPreview.task.status === "done"
                   ? "ok"
                   : hoverPreview.task.status === "doing"
-                  ? "info"
-                  : "muted")
+                    ? "info"
+                    : "muted")
               }
             >
               {hoverPreview.task.status}
@@ -1444,8 +1444,8 @@ export default function ProjectTeamTab() {
                             (t.status === "done"
                               ? "ok"
                               : t.status === "doing"
-                              ? "info"
-                              : "muted")
+                                ? "info"
+                                : "muted")
                           }
                         >
                           {t.status}

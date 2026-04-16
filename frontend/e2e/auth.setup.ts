@@ -18,8 +18,14 @@ if (!fs.existsSync(authDir)) {
 
 setup("authenticate as admin", async ({ page }) => {
   await page.goto("/login");
-  await page.fill("#username", process.env.DJANGO_SUPERUSER_USERNAME ?? "admin");
-  await page.fill("#password", process.env.DJANGO_SUPERUSER_PASSWORD ?? "admin123");
+  await page.fill(
+    "#username",
+    process.env.DJANGO_SUPERUSER_USERNAME ?? "admin",
+  );
+  await page.fill(
+    "#password",
+    process.env.DJANGO_SUPERUSER_PASSWORD ?? "admin123",
+  );
   await page.click('button[type="submit"]');
   await page.waitForURL("**/dashboard**");
   await page.context().storageState({ path: authFile });

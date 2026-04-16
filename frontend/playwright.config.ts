@@ -24,7 +24,6 @@ export default defineConfig({
   },
 
   projects: [
-
     // ── Projekt setup: logowanie i zapis storageState ──
     // Uruchamia się PRZED testami i zapisuje stan sesji do pliku.
     // Patrz: https://playwright.dev/docs/auth#basic-shared-account-in-all-tests
@@ -32,7 +31,6 @@ export default defineConfig({
       name: "setup",
       testMatch: /.*\.setup\.ts/,
     },
-
 
     // ── Projekt testowy: korzysta z gotowej sesji ──
     {

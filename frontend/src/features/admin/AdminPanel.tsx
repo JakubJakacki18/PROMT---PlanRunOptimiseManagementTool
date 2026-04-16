@@ -112,7 +112,8 @@ export default function AdminPanel() {
       }
     } else if (modalMode === "edit" && editingUser) {
       const payload: UpdateUserPayload = {};
-      if (formUsername !== editingUser.username) payload.username = formUsername;
+      if (formUsername !== editingUser.username)
+        payload.username = formUsername;
       if (formEmail !== (editingUser.email || "")) payload.email = formEmail;
       if (formFirstName !== (editingUser.first_name || ""))
         payload.first_name = formFirstName;
@@ -174,7 +175,7 @@ export default function AdminPanel() {
     admins: users.filter((u) => u.profile?.role === "admin").length,
     pms: users.filter((u) => u.profile?.role === "pm").length,
     members: users.filter(
-      (u) => !u.profile?.role || u.profile?.role === "member"
+      (u) => !u.profile?.role || u.profile?.role === "member",
     ).length,
     viewers: users.filter((u) => u.profile?.role === "viewer").length,
   };
@@ -330,12 +331,8 @@ export default function AdminPanel() {
                         {ROLE_LABELS[role]}
                       </span>
                     </td>
-                    <td className="ap__phone">
-                      {u.profile?.phone || "—"}
-                    </td>
-                    <td className="ap__center">
-                      {u.tasks_count ?? 0}
-                    </td>
+                    <td className="ap__phone">{u.profile?.phone || "—"}</td>
+                    <td className="ap__center">{u.tasks_count ?? 0}</td>
                     <td className="ap__center">
                       <span className="ap__done-badge">
                         {u.done_tasks_count ?? 0}
@@ -511,8 +508,8 @@ export default function AdminPanel() {
                   {creating || updating
                     ? "Zapisywanie…"
                     : modalMode === "create"
-                    ? "Utwórz użytkownika"
-                    : "Zapisz zmiany"}
+                      ? "Utwórz użytkownika"
+                      : "Zapisz zmiany"}
                 </button>
               </div>
             </form>

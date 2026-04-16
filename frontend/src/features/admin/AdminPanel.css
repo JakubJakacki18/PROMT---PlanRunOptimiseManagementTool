@@ -5,7 +5,11 @@
 .ap {
   max-width: 1200px;
   margin: 0 auto;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
 }
 
 /* ── Loading / Error ── */
@@ -82,7 +86,9 @@
   cursor: pointer;
   white-space: nowrap;
   box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
-  transition: transform 0.15s, box-shadow 0.15s;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
 }
 
 .ap__create-btn:hover {
@@ -109,7 +115,9 @@
   border-radius: 12px;
   padding: 16px;
   text-align: center;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .ap__stat:hover {
@@ -176,7 +184,9 @@
   outline: none;
   font-size: 0.9rem;
   background: white;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .ap__search:focus {
@@ -364,7 +374,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
   margin-left: 4px;
 }
 
@@ -523,7 +535,9 @@
   border-radius: 10px;
   font-size: 0.9rem;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
   background: white;
   color: #0f172a;
 }
@@ -573,7 +587,9 @@
   font-size: 0.88rem;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
-  transition: transform 0.15s, box-shadow 0.15s;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
 }
 
 .ap__btn-primary:hover {

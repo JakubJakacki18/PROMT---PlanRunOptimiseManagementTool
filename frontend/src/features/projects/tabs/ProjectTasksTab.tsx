@@ -76,7 +76,7 @@ function fmtDateLong(dateStr: string | null | undefined): string {
 function isOutsideProjectRange(
   task: Task,
   projectStart: string | null | undefined,
-  projectEnd: string | null | undefined
+  projectEnd: string | null | undefined,
 ): boolean {
   if (!projectStart && !projectEnd) return false;
 
@@ -103,7 +103,7 @@ function isOverdue(
   task: Task,
   todayStart: Date,
   projectStart: string | null | undefined,
-  projectEnd: string | null | undefined
+  projectEnd: string | null | undefined,
 ): boolean {
   if (isDone(task.status)) return false;
 
@@ -186,7 +186,7 @@ export default function ProjectTasksTab() {
     const completedCount = tasks.filter((t) => isDone(t.status)).length;
 
     const overdue = tasks.filter((t) =>
-      isOverdue(t, today, project.start_date, project.end_date)
+      isOverdue(t, today, project.start_date, project.end_date),
     ).length;
 
     const thisWeek = tasks.filter((t) => isDueThisWeek(t, today)).length;
@@ -198,7 +198,7 @@ export default function ProjectTasksTab() {
     });
 
     const statusPie: StatusPieItem[] = Array.from(statusMap.entries()).map(
-      ([name, value]) => ({ name, value })
+      ([name, value]) => ({ name, value }),
     );
 
     let low = 0,
@@ -246,14 +246,14 @@ export default function ProjectTasksTab() {
 
     if (prioritiesFilter.length > 0) {
       result = result.filter((task) =>
-        prioritiesFilter.includes(task.priority)
+        prioritiesFilter.includes(task.priority),
       );
     }
 
     if (dueFilter !== "all") {
       if (dueFilter === "overdue") {
         result = result.filter((task) =>
-          isOverdue(task, today, project.start_date, project.end_date)
+          isOverdue(task, today, project.start_date, project.end_date),
         );
       } else if (dueFilter === "today") {
         result = result.filter((task) => isDueToday(task, today));
@@ -341,7 +341,7 @@ export default function ProjectTasksTab() {
 
   function togglePriorityFilter(p: TaskPriority) {
     setPrioritiesFilter((prev) =>
-      prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]
+      prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p],
     );
   }
 
@@ -380,7 +380,7 @@ export default function ProjectTasksTab() {
           meta={
             total > 0
               ? `${completed} ukończone (${Math.round(
-                  (completed / Math.max(total, 1)) * 100
+                  (completed / Math.max(total, 1)) * 100,
                 )}%)`
               : "Brak zadań"
           }
@@ -426,7 +426,7 @@ export default function ProjectTasksTab() {
           active={prioritiesFilter.length === 1 && prioritiesFilter[0] === 3}
           onClick={() =>
             setPrioritiesFilter((p) =>
-              p.length === 1 && p[0] === 3 ? [] : [3]
+              p.length === 1 && p[0] === 3 ? [] : [3],
             )
           }
         />
@@ -482,7 +482,7 @@ export default function ProjectTasksTab() {
                         task,
                         today,
                         project.start_date,
-                        project.end_date
+                        project.end_date,
                       )}
                       dueToday={isDueToday(task, today)}
                     />
@@ -511,7 +511,7 @@ export default function ProjectTasksTab() {
                               task,
                               today,
                               project.start_date,
-                              project.end_date
+                              project.end_date,
                             )}
                             dueToday={isDueToday(task, today)}
                           />
@@ -731,7 +731,7 @@ export default function ProjectTasksTab() {
                               if (!item) return;
                               const s = item.name as TaskStatus;
                               setStatusFilter((prev) =>
-                                prev === s ? "all" : s
+                                prev === s ? "all" : s,
                               );
                             }}
                           >
@@ -816,7 +816,7 @@ export default function ProjectTasksTab() {
                               if (!item) return;
                               const p = item.priority;
                               setPrioritiesFilter((prev) =>
-                                prev.length === 1 && prev[0] === p ? [] : [p]
+                                prev.length === 1 && prev[0] === p ? [] : [p],
                               );
                             }}
                           >
@@ -910,8 +910,8 @@ function TaskCard(props: {
     task.status === "done"
       ? "tsk-chip-status--done"
       : task.status === "doing"
-      ? "tsk-chip-status--doing"
-      : "tsk-chip-status--todo";
+        ? "tsk-chip-status--doing"
+        : "tsk-chip-status--todo";
 
   return (
     <div className="tsk-item-card" title={task.description ?? ""}>
@@ -972,7 +972,7 @@ function renderSkeletonCards(count: number) {
         <div className="tsk-skeleton-line tsk-skeleton-line-short" />
         <div className="tsk-skeleton-line tsk-skeleton-line-medium" />
         <div className="tsk-skeleton-line tsk-skeleton-line-long" />
-      </div>
+      </div>,
     );
   }
   return items;

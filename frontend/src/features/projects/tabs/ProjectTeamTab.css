@@ -95,7 +95,10 @@
 .team-lite-kpi-btn {
   cursor: pointer;
   text-align: left;
-  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease;
 }
 .team-lite-kpi-btn:hover {
   border-color: #c7d2fe;
@@ -229,7 +232,11 @@
   border-radius: 12px;
   border: 1px solid transparent;
   background: #ffffff;
-  transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    transform 120ms ease;
 }
 
 .team-person-row:hover {
@@ -280,7 +287,7 @@
 
 .team-person-email {
   margin-top: 2px;
-  font-size: 0.80rem;
+  font-size: 0.8rem;
   color: #6b7280;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -456,7 +463,10 @@
   background: #ffffff;
   box-shadow: 0 6px 14px rgba(15, 23, 42, 0.05);
   cursor: pointer;
-  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease;
 }
 
 .team-big-card-btn:hover {
@@ -722,7 +732,10 @@
   font-weight: 600;
   color: #111827;
 
-  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease;
 }
 
 .btn:hover {
@@ -1086,7 +1099,9 @@
 }
 
 .team-modal-mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
   font-size: 0.85rem;
 }
 

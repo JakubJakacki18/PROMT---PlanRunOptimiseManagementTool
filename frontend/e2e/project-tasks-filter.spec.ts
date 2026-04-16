@@ -1,45 +1,52 @@
-import {test, expect} from "@playwright/test";
+import { test, expect } from "@playwright/test";
 
 test("projekt tasks — filtr zaległe + szukaj 'a' + priorytet Średni", async ({
-                                                                                 page,
-                                                                             }) => {
+  page,
+}) => {
+  await page.goto("/dashboard/projects");
+  await expect(
+    page.getByRole("link", { name: "Open project" }).first(),
+  ).toBeVisible({
+    timeout: 10000,
+  });
+  await page.getByRole("link", { name: "Open project" }).first().click();
 
-    await page.goto("/dashboard/projects");
-    await expect(page.getByRole("link", {name: "Open project"}).first()).toBeVisible({
-        timeout: 10000,
-    });
-    await page.getByRole("link", {name: "Open project"}).first().click();
+  await expect(page.getByRole("link", { name: "Tasks" })).toBeVisible();
+  await page.getByRole("link", { name: "Tasks" }).click();
+  await page.waitForURL("**/tasks");
 
-    await expect(page.getByRole("link", {name: "Tasks"})).toBeVisible();
-    await page.getByRole("link", {name: "Tasks"}).click();
-    await page.waitForURL("**/tasks");
+  await expect(page.locator(".tsk-list-subtitle")).toBeVisible({
+    timeout: 10000,
+  });
 
-    await expect(page.locator(".tsk-list-subtitle")).toBeVisible({timeout: 10000});
+  const zaleglyTile = page
+    .locator(".tsk-kpi-tile")
+    .filter({ hasText: "Zaległe" });
+  await zaleglyTile.click();
+  await expect(zaleglyTile).toHaveClass(/is-active/);
+  await expect(page.locator(".tsk-select").first()).toHaveValue("overdue");
 
-    const zaleglyTile = page.locator(".tsk-kpi-tile").filter({hasText: "Zaległe"});
-    await zaleglyTile.click();
-    await expect(zaleglyTile).toHaveClass(/is-active/);
-    await expect(page.locator(".tsk-select").first()).toHaveValue("overdue");
+  const searchInput = page.locator("input.tsk-search-input");
+  await searchInput.fill("a");
+  await expect(searchInput).toHaveValue("a");
 
-    const searchInput = page.locator("input.tsk-search-input");
-    await searchInput.fill("a");
-    await expect(searchInput).toHaveValue("a");
+  const srednipPill = page
+    .locator(".tsk-filter-block")
+    .filter({ hasText: "Priorytet" })
+    .locator(".tsk-pill")
+    .filter({ hasText: "Średni" });
 
-    const srednipPill = page
-        .locator(".tsk-filter-block")
-        .filter({hasText: "Priorytet"})
-        .locator(".tsk-pill")
-        .filter({hasText: "Średni"});
+  await srednipPill.click();
+  await expect(srednipPill).toHaveClass(/is-active/);
 
-    await srednipPill.click();
-    await expect(srednipPill).toHaveClass(/is-active/);
+  await expect(page.locator(".tsk-list-subtitle")).toContainText("widocznych");
 
-    await expect(page.locator(".tsk-list-subtitle")).toContainText("widocznych");
+  const cards = page.locator(".tsk-item-card");
+  const count = await cards.count();
 
-    const cards = page.locator(".tsk-item-card");
-    const count = await cards.count();
-
-    for (let i = 0; i < count; i++) {
-        await expect(cards.nth(i).locator(".tsk-badge-priority")).toContainText("Średni");
-    }
+  for (let i = 0; i < count; i++) {
+    await expect(cards.nth(i).locator(".tsk-badge-priority")).toContainText(
+      "Średni",
+    );
+  }
 });

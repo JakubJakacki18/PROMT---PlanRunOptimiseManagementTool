@@ -120,7 +120,7 @@ export default function TasksPage() {
 
   const handleEditSubmit = async (
     id: number,
-    patch: Partial<CreateTaskPayload>
+    patch: Partial<CreateTaskPayload>,
   ) => {
     try {
       await updateTask({ id, patch }).unwrap();
@@ -168,7 +168,7 @@ export default function TasksPage() {
                 value={projectId}
                 onChange={(e) =>
                   setProjectId(
-                    e.target.value === "" ? "" : Number(e.target.value)
+                    e.target.value === "" ? "" : Number(e.target.value),
                   )
                 }
                 placeholder="np. 5"
@@ -192,7 +192,7 @@ export default function TasksPage() {
                 value={fundingId}
                 onChange={(e) =>
                   setFundingId(
-                    e.target.value === "" ? "" : Number(e.target.value)
+                    e.target.value === "" ? "" : Number(e.target.value),
                   )
                 }
                 placeholder="np. 3"
@@ -239,8 +239,8 @@ export default function TasksPage() {
               {isFetching
                 ? "Wczytywanie…"
                 : search.trim()
-                ? `${filteredItems.length} / ${data?.count ?? 0}`
-                : `${data?.count ?? 0} łącznie`}
+                  ? `${filteredItems.length} / ${data?.count ?? 0}`
+                  : `${data?.count ?? 0} łącznie`}
             </span>
           </div>
         </header>
@@ -314,15 +314,15 @@ function TaskCard({
     statusSafe === "done"
       ? "chip--green"
       : statusSafe === "doing"
-      ? "chip--amber"
-      : "chip--gray";
+        ? "chip--amber"
+        : "chip--gray";
 
   const prio =
     task.priority >= 3
       ? chip("chip--red", "Wysoki")
       : task.priority === 2
-      ? chip("chip--amber", "Średni")
-      : chip("chip--sky", "Niski");
+        ? chip("chip--amber", "Średni")
+        : chip("chip--sky", "Niski");
 
   const projectName =
     task.project_name ?? (task.scope_project ? `#${task.scope_project}` : "");

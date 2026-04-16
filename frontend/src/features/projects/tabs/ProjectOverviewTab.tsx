@@ -104,7 +104,7 @@ function isHighPriority(priority: TaskPriority | null | undefined): boolean {
 function isOutsideProjectRange(
   task: Task,
   projectStart: string | null | undefined,
-  projectEnd: string | null | undefined
+  projectEnd: string | null | undefined,
 ): boolean {
   if (!projectStart && !projectEnd) return false;
 
@@ -130,7 +130,7 @@ function isOverdue(
   task: Task,
   todayStart: Date,
   projectStart: string | null | undefined,
-  projectEnd: string | null | undefined
+  projectEnd: string | null | undefined,
 ): boolean {
   if (isDone(task.status)) return false;
 
@@ -224,20 +224,20 @@ export default function ProjectOverviewTab() {
     const highPriority = tasks.filter((t) => isHighPriority(t.priority)).length;
 
     const overdue = tasks.filter((t) =>
-      isOverdue(t, todayStart, project.start_date, project.end_date)
+      isOverdue(t, todayStart, project.start_date, project.end_date),
     ).length;
 
     const noStartDate = tasks.filter((t) => !t.start_date).length;
     const noDueDate = tasks.filter((t) => !t.due_date).length;
 
     const missingDatesCountCalc = tasks.filter(
-      (t) => !t.start_date || !t.due_date
+      (t) => !t.start_date || !t.due_date,
     ).length;
 
     const highPriorityOverdueCountCalc = tasks.filter(
       (t) =>
         isHighPriority(t.priority) &&
-        isOverdue(t, todayStart, project.start_date, project.end_date)
+        isOverdue(t, todayStart, project.start_date, project.end_date),
     ).length;
 
     const completion = totalCount === 0 ? 0 : done / Math.max(totalCount, 1);
@@ -312,7 +312,7 @@ export default function ProjectOverviewTab() {
         weekday,
         label: weekdayLabel(weekday),
         count,
-      })
+      }),
     );
 
     // Wynik ryzyka
@@ -344,12 +344,12 @@ export default function ProjectOverviewTab() {
         todayStart.getTime() > projEnd.getTime()
           ? projEnd
           : todayStart.getTime() < projStart.getTime()
-          ? projStart
-          : todayStart;
+            ? projStart
+            : todayStart;
       const elapsedDays = clamp(
         daysBetween(projStart, clampedToday),
         0,
-        totalDays
+        totalDays,
       );
       timeProgressPctCalc = Math.round((elapsedDays / totalDays) * 100);
       scheduleDeltaPctCalc = taskProgressPctCalc - timeProgressPctCalc;
@@ -460,10 +460,10 @@ export default function ProjectOverviewTab() {
     momentumTrend === "up"
       ? "Momentum rośnie"
       : momentumTrend === "down"
-      ? "Momentum spada"
-      : momentumTrend === "stable"
-      ? "Momentum stabilne"
-      : "Za mało danych";
+        ? "Momentum spada"
+        : momentumTrend === "stable"
+          ? "Momentum stabilne"
+          : "Za mało danych";
 
   const hasCycleData =
     avgCycleTime !== null &&
@@ -481,19 +481,19 @@ export default function ProjectOverviewTab() {
     riskLevel === "healthy"
       ? "W większości pod kontrolą – obserwuj przeterminowane zadania i brakujące daty."
       : riskLevel === "warning"
-      ? "Są zauważalne problemy – skup się na przeterminowanych i wysokopriorytetowych zadaniach."
-      : "Wysokie ryzyko – dużo przeterminowanych lub słabo zdefiniowanych zadań; projekt wymaga uwagi.";
+        ? "Są zauważalne problemy – skup się na przeterminowanych i wysokopriorytetowych zadaniach."
+        : "Wysokie ryzyko – dużo przeterminowanych lub słabo zdefiniowanych zadań; projekt wymaga uwagi.";
 
   const workloadHint =
     statusTotal === 0
       ? "Brak zadań – dodaj pierwsze, aby zobaczyć przepływ pracy."
       : doingCount > todoCount && doingCount > doneCount
-      ? "Dużo w toku – zwróć uwagę na blokery i przepływ."
-      : todoCount > doingCount && todoCount > doneCount
-      ? "Backlog dominuje – rozważ priorytety i start kluczowych zadań."
-      : doneCount > todoCount && doneCount > doingCount
-      ? "Duża część gotowa – jesteś blisko końca."
-      : "Praca dość równomiernie rozłożona.";
+        ? "Dużo w toku – zwróć uwagę na blokery i przepływ."
+        : todoCount > doingCount && todoCount > doneCount
+          ? "Backlog dominuje – rozważ priorytety i start kluczowych zadań."
+          : doneCount > todoCount && doneCount > doingCount
+            ? "Duża część gotowa – jesteś blisko końca."
+            : "Praca dość równomiernie rozłożona.";
 
   const riskInlineNote = `${riskMessage} • ${workloadHint}`;
 
@@ -573,8 +573,8 @@ export default function ProjectOverviewTab() {
               {riskLevel === "healthy"
                 ? "Zdrowo"
                 : riskLevel === "warning"
-                ? "Uwaga"
-                : "Krytycznie"}
+                  ? "Uwaga"
+                  : "Krytycznie"}
             </span>
             <span className="pov-mood-score">{riskScore}/100</span>
           </div>

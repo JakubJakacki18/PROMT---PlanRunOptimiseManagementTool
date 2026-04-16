@@ -11,7 +11,6 @@ export interface TaskAssignee {
   avatar_url?: string;
 }
 
-
 export interface Task {
   id: number;
   title: string;
@@ -21,16 +20,16 @@ export interface Task {
   start_date: string | null;
   due_date: string | null;
 
-  cost_amount: string | null;   
+  cost_amount: string | null;
   cost_currency: string;
   receipt_url: string;
   receipt_note: string;
-  est_hours: string | null;     
+  est_hours: string | null;
 
-  template: number | null;      
+  template: number | null;
 
-  created_at: string;           
-  updated_at: string;           
+  created_at: string;
+  updated_at: string;
 
   scope_project: number | null;
   scope_funding: number | null;
@@ -38,9 +37,9 @@ export interface Task {
 
   project_name?: string | null;
   funding_name?: string | null;
-  
+
   assignees?: AppUser[];
-} 
+}
 
 export interface CreateTaskPayload {
   title: string;
@@ -91,12 +90,9 @@ export interface UpdateTaskPayload {
   assignee_ids?: number[];
 }
 
-
-
 export interface Paged<T> {
   count: number;
   next: string | null;
   previous: string | null;
   results: T[];
 }
-

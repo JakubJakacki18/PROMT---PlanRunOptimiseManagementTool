@@ -9,7 +9,11 @@
   box-shadow: 0 16px 30px rgba(15, 23, 42, 0.06);
   overflow: hidden;
   color: #111827;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "SF Pro Text",
     sans-serif;
   height: 100%;
   min-height: 0;
@@ -81,8 +85,11 @@
   color: #111827;
   font-size: 0.86rem;
   cursor: pointer;
-  transition: background 0.12s ease, border-color 0.12s ease,
-    box-shadow 0.12s ease, transform 0.05s ease;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    box-shadow 0.12s ease,
+    transform 0.05s ease;
   white-space: nowrap;
   line-height: 1;
 }
@@ -474,7 +481,6 @@
   pointer-events: none;
 }
 
-
 .timeline-tab .tl-vis-item.st-todo.prio-low {
   border-color: #a3e635;
   background: linear-gradient(90deg, var(--st-todo) 0%, var(--prio-low) 100%);
@@ -489,11 +495,7 @@
 }
 .timeline-tab .tl-vis-item.st-todo.prio-high {
   border-color: #f97373;
-  background: linear-gradient(
-    90deg,
-    var(--st-todo) 0%,
-    var(--prio-high) 100%
-  );
+  background: linear-gradient(90deg, var(--st-todo) 0%, var(--prio-high) 100%);
 }
 
 .timeline-tab .tl-vis-item.st-in_progress.prio-low {
@@ -535,11 +537,7 @@
 }
 .timeline-tab .tl-vis-item.st-done.prio-high {
   border-color: #f97373;
-  background: linear-gradient(
-    90deg,
-    var(--st-done) 0%,
-    var(--prio-high) 100%
-  );
+  background: linear-gradient(90deg, var(--st-done) 0%, var(--prio-high) 100%);
 }
 
 /* New task highlight */
@@ -592,7 +590,6 @@
     box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
   }
 }
-
 
 .timeline-tab .drag-rect {
   position: absolute;

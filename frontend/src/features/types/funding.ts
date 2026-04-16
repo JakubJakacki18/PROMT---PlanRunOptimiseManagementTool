@@ -6,23 +6,23 @@ export const FUNDING_TYPE = {
   DONATION: "donation",
   INTERNAL: "internal",
 } as const;
-export type FundingType = typeof FUNDING_TYPE[keyof typeof FUNDING_TYPE];
+export type FundingType = (typeof FUNDING_TYPE)[keyof typeof FUNDING_TYPE];
 
 export interface Funding {
   id: ID;
   name: string;
   program: string | null;
   funder: string | null;
-  amount_total: string | null; 
-  start_date: string | null;   
-  end_date: string | null;     
+  amount_total: string | null;
+  start_date: string | null;
+  end_date: string | null;
 
   type?: FundingType;
-  currency?: string;                   
+  currency?: string;
   agreement_number?: string | null;
-  reporting_deadline?: string | null;   
+  reporting_deadline?: string | null;
   description?: string | null;
-  created_at?: string;                  
+  created_at?: string;
 }
 
 export type FundingCreate = Omit<Funding, "id">;
@@ -34,7 +34,6 @@ export interface Paginated<T> {
   previous: string | null;
   results: T[];
 }
-
 
 export interface FundingListParams {
   search?: string;
@@ -59,10 +58,10 @@ export interface FundingListParams {
 }
 export interface FundingDetailVM<TTask = unknown> {
   funding: Funding;
-  tasks: TTask[]; 
+  tasks: TTask[];
 }
 export interface TaskListForFundingParams {
-  funding: ID;                
+  funding: ID;
   status?: string;
   assignee?: number;
   priority?: number | string;
