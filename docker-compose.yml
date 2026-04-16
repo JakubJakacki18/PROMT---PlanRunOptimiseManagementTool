@@ -27,7 +27,7 @@ services:
     build:
       context: ./frontend
       dockerfile: ./Dockerfile
-    container_name: frontend
+    container_name: promt_frontend
     ports:
       - "5173:5173"
     environment:
@@ -47,7 +47,7 @@ services:
     build:
       context: ./backend
       dockerfile: ./Dockerfile
-    container_name: backend
+    container_name: promt_backend
     restart: no
     depends_on:
       db:
@@ -78,7 +78,7 @@ services:
   playwright:
     build:
       context: ./frontend
-      dockerfile: ./Dockerfile.playwright
+      dockerfile: ./playwright.Dockerfile
     container_name: playwright_tests
     profiles:
       - test
