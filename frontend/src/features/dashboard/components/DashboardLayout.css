@@ -35,7 +35,9 @@
   border-radius: 6px;
   text-decoration: none;
   color: #444;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 
 .dashboard__link.active {

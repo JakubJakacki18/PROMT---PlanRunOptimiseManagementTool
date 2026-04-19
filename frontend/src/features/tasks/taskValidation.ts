@@ -13,7 +13,7 @@ export const estHoursField = z
       v === undefined ||
       v === "" ||
       (!Number.isNaN(parseFloat(v)) && parseFloat(v) >= 0),
-    "Szacowany czas musi być ≥ 0"
+    "Szacowany czas musi być ≥ 0",
   );
 
 export const costAmountField = z
@@ -24,7 +24,7 @@ export const costAmountField = z
       v === undefined ||
       v === "" ||
       (!Number.isNaN(parseFloat(v)) && parseFloat(v) >= 0),
-    "Koszt musi być ≥ 0"
+    "Koszt musi być ≥ 0",
   );
 
 export const receiptUrlField = z
@@ -32,12 +32,12 @@ export const receiptUrlField = z
   .optional()
   .refine(
     (v) => !v || v.trim() === "" || /^https?:\/\/.+/i.test(v),
-    "Niepoprawny adres URL"
+    "Niepoprawny adres URL",
   );
 
 export function validateDateRange(
   start_date?: string,
-  due_date?: string
+  due_date?: string,
 ): boolean {
   if (start_date && due_date && start_date > due_date) return false;
   return true;

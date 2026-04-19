@@ -5,8 +5,7 @@ import "./DashboardLayout.css";
 
 export default function DashboardLayout() {
   const { data: me } = useMeQuery();
-  const isAdminOrPM =
-    me?.is_staff || me?.role === "admin" || me?.role === "pm";
+  const isAdminOrPM = me?.is_staff || me?.role === "admin" || me?.role === "pm";
 
   return (
     <div className="layout grid grid-cols-[240px_minmax(0,1fr)] min-h-screen bg-slate-50 text-slate-900">

@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { healthApi } from "../features/health/healtsApi";
 import { projectsApi } from "../features/projects/projectsApi";
-import { authApi } from "../features/auth/authApi"; 
+import { authApi } from "../features/auth/authApi";
 import { tasksApi } from "../features/tasks/tasksApi";
 import { fundingsApi } from "../features/api/fundingApi";
 import { projectFundingApi } from "../features/api/projectFundingApi";
@@ -25,7 +25,8 @@ export const store = configureStore({
       tasksApi.middleware,
       fundingsApi.middleware,
       projectFundingApi.middleware,
-      usersApi.middleware,)
+      usersApi.middleware,
+    ),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -7,7 +7,12 @@ import type {
   ProjectUpdate,
 } from "../types/project";
 
-type Paged<T> = { count: number; next: string | null; previous: string | null; results: T[] };
+type Paged<T> = {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+};
 
 export const projectsApi = createApi({
   reducerPath: "projectsApi",
@@ -26,7 +31,10 @@ export const projectsApi = createApi({
       providesTags: (res) =>
         res?.results
           ? [
-              ...res.results.map((pr) => ({ type: "Project" as const, id: pr.id })),
+              ...res.results.map((pr) => ({
+                type: "Project" as const,
+                id: pr.id,
+              })),
               { type: "Projects" as const, id: "LIST" },
             ]
           : [{ type: "Projects" as const, id: "LIST" }],

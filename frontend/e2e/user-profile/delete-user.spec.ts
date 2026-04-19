@@ -15,11 +15,15 @@ test("GIVEN admin i nowo utworzony user WHEN klika usuń i potwierdza THEN user 
   await page.fill("#field-password", "haslo123");
   await page.click("#submit-user-btn");
 
-  await expect(page.locator('[role="dialog"]')).not.toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('[role="dialog"]')).not.toBeVisible({
+    timeout: 8_000,
+  });
 
   await page.fill("#search-users-input", userToDelete);
 
-  const row = page.locator("tbody tr.ap__row").filter({ hasText: userToDelete });
+  const row = page
+    .locator("tbody tr.ap__row")
+    .filter({ hasText: userToDelete });
   await expect(row).toBeVisible({ timeout: 8_000 });
 
   const userId = await row.getAttribute("data-user-id");

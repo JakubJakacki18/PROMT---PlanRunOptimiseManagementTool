@@ -22,5 +22,7 @@ test("GIVEN admin z tabelą WHEN wpisuje frazę w wyszukiwarkę THEN tabela filt
   }
 
   await page.fill("#search-users-input", "");
-  await expect(page.locator("tbody tr.ap__row")).toHaveCount(totalRows, { timeout: 3_000 });
+  await expect(page.locator("tbody tr.ap__row")).toHaveCount(totalRows, {
+    timeout: 3_000,
+  });
 });

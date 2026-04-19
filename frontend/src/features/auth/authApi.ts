@@ -12,7 +12,11 @@ export const authApi = createApi({
       query: () => ({ url: "/api/auth/csrf/" }),
     }),
     login: b.mutation<MeUser, LoginBody>({
-      query: (body) => ({ url: "/api/auth/login/", method: "post", data: body }),
+      query: (body) => ({
+        url: "/api/auth/login/",
+        method: "post",
+        data: body,
+      }),
     }),
     logout: b.mutation<void, void>({
       query: () => ({ url: "/api/auth/logout/", method: "post" }),
@@ -23,4 +27,5 @@ export const authApi = createApi({
   }),
 });
 
-export const { useCsrfQuery, useLoginMutation, useLogoutMutation, useMeQuery } = authApi;
+export const { useCsrfQuery, useLoginMutation, useLogoutMutation, useMeQuery } =
+  authApi;

@@ -21,10 +21,15 @@ test("GIVEN admin i user z rolą member WHEN zmienia rolę na pm THEN badge poka
   await page.selectOption("#field-role", "pm");
   await page.click("#submit-user-btn");
 
-  await expect(page.locator('[role="dialog"]')).not.toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('[role="dialog"]')).not.toBeVisible({
+    timeout: 8_000,
+  });
 
   await page.selectOption("#role-filter-select", "all");
 
   const editedRow = page.locator(`[data-user-id="${userId}"]`);
-  await expect(editedRow.locator(".ap__role-badge")).toContainText("Project Manager", { timeout: 5_000 });
+  await expect(editedRow.locator(".ap__role-badge")).toContainText(
+    "Project Manager",
+    { timeout: 5_000 },
+  );
 });

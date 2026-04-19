@@ -1,17 +1,17 @@
-import { test, expect } from "@playwright/test";
+import { expect, Page } from "@playwright/test";
 
-test("logowanie i dodanie poprawnego finansowania", async ({ page }) => {
+export async function createFunding(page: Page) {
+  const name = `Test Funding ${Date.now()}`;
   await page.goto("/dashboard/fundings");
   await expect(
     page.getByRole("button", { name: "Dodaj finansowanie" }),
   ).toBeVisible();
-
   await page.getByRole("button", { name: "Dodaj finansowanie" }).click();
   await expect(
     page.getByRole("heading", { name: "Dodaj finansowanie" }),
   ).toBeVisible();
 
-  await page.getByLabel("Nazwa").fill("Test Funding");
+  await page.getByLabel("Nazwa").fill(name);
   await page.getByLabel("Program").fill("NCBIR");
   await page.getByLabel("Finansujący").fill("UE");
   await page
@@ -41,5 +41,5 @@ test("logowanie i dodanie poprawnego finansowania", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "Dodaj finansowanie" }),
   ).not.toBeVisible();
-  await expect(page.getByText("Test Funding").first()).toBeVisible();
-});
+  return name;
+}

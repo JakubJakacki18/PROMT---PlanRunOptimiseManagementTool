@@ -21,7 +21,9 @@ test("GIVEN admin w panelu WHEN tworzy użytkownika z rolą member THEN nowy use
   await page.fill("#field-phone", "+48123456789");
   await page.click("#submit-user-btn");
 
-  await expect(page.locator('[role="dialog"]')).not.toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('[role="dialog"]')).not.toBeVisible({
+    timeout: 8_000,
+  });
 
   await page.fill("#search-users-input", uniqueUser);
 

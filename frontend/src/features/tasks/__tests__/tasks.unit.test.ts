@@ -50,7 +50,9 @@ describe("Walidacja tytułu", () => {
     const result = titleField.safeParse("");
     expect(result.success).toBe(false);
     if (!result.success)
-      expect(result.error.issues[0].message).toBe("Tytuł musi mieć min. 3 znaki");
+      expect(result.error.issues[0].message).toBe(
+        "Tytuł musi mieć min. 3 znaki",
+      );
   });
 
   it('title="a" (1 znak) → błąd walidacji', () => {
@@ -70,7 +72,9 @@ describe("Walidacja szacowanego czasu (estHoursField)", () => {
     const result = estHoursField.safeParse("-1");
     expect(result.success).toBe(false);
     if (!result.success)
-      expect(result.error.issues[0].message).toBe("Szacowany czas musi być ≥ 0");
+      expect(result.error.issues[0].message).toBe(
+        "Szacowany czas musi być ≥ 0",
+      );
   });
 
   it("est_hours=0 → wg kodu walidacja przechodzi (>= 0)", () => {
@@ -113,7 +117,9 @@ describe("Przypisanie osób (filterTasksByAssignee)", () => {
     const task = makeTask({ id: 10, assignees: [userA, userB] as any });
     expect(filterTasksByAssignee([task], userA.id)).toHaveLength(1);
     expect(filterTasksByAssignee([task], userB.id)).toHaveLength(1);
-    expect(filterTasksByAssignee([task], userA.id)[0].assignees).toHaveLength(2);
+    expect(filterTasksByAssignee([task], userA.id)[0].assignees).toHaveLength(
+      2,
+    );
   });
 });
 
@@ -233,7 +239,7 @@ describe("Filtr — termin dzisiaj (filterDueToday)", () => {
 });
 
 describe("Filtr — termin w tym tygodniu (filterDueThisWeek)", () => {
-  const today = new Date("2025-06-15T12:00:00"); 
+  const today = new Date("2025-06-15T12:00:00");
   it("zadanie z due_date w bieżącym tygodniu → w filtrze", () => {
     const tasks: Task[] = [
       makeTask({ id: 1, due_date: "2025-06-10" }),

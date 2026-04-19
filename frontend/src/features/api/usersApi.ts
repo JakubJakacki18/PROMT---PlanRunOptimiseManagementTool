@@ -1,6 +1,10 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "../../app/axiosBaseQuery";
-import type { AppUser, CreateUserPayload, UpdateUserPayload } from "../types/users";
+import type {
+  AppUser,
+  CreateUserPayload,
+  UpdateUserPayload,
+} from "../types/users";
 
 type Paged<T> = {
   count: number;

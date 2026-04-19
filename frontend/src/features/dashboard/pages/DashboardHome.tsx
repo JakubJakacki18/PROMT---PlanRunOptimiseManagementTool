@@ -29,7 +29,7 @@ export default function DashboardHome() {
   const avatarUrl = defaultAvatar;
 
   const [lastProject, setLastProject] = useState<LastActiveProject | null>(
-    null
+    null,
   );
   const [activity, setActivity] = useState<ActivityPoint[]>([]);
   const [heatDays, setHeatDays] = useState<HeatDay[]>([]);
@@ -202,7 +202,7 @@ export default function DashboardHome() {
               className="ai-more"
               onClick={() =>
                 alert(
-                  "Asystent AI jest w przygotowaniu. W kolejnych wersjach pojawi się podgląd działania."
+                  "Asystent AI jest w przygotowaniu. W kolejnych wersjach pojawi się podgląd działania.",
                 )
               }
               title="Zobacz zaplanowane funkcje"
@@ -395,8 +395,8 @@ function activityChip(level: "low" | "medium" | "high") {
     level === "high"
       ? "chip--red"
       : level === "medium"
-      ? "chip--amber"
-      : "chip--gray";
+        ? "chip--amber"
+        : "chip--gray";
   const txt =
     level === "high" ? "WYSOKA" : level === "medium" ? "ŚREDNIA" : "NISKA";
   return <span className={`chip ${cls}`}>{txt} AKTYWNOŚĆ</span>;
@@ -453,12 +453,12 @@ function defaultHeatmap28(): HeatDay[] {
       w === 0
         ? 0
         : w === 6
-        ? 1
-        : Math.random() > 0.72
-        ? 3
-        : Math.random() > 0.45
-        ? 2
-        : 1;
+          ? 1
+          : Math.random() > 0.72
+            ? 3
+            : Math.random() > 0.45
+              ? 2
+              : 1;
 
     out.push({
       iso: toISODate(d),
@@ -477,8 +477,8 @@ function computeInsights(days: HeatDay[]) {
     ratio >= 0.75
       ? "Regularny rytm"
       : ratio >= 0.45
-      ? "Umiarkowany rytm"
-      : "Nieregularny";
+        ? "Umiarkowany rytm"
+        : "Nieregularny";
 
   const buckets = new Map<string, { sum: number; cnt: number }>();
   for (const d of days) {
