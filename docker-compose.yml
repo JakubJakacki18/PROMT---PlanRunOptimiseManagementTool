@@ -33,6 +33,9 @@ services:
     environment:
       VITE_API_PROXY_TARGET: http://backend:8000
       VITE_API_URL: ""
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     networks:
       - my-network
     healthcheck:
@@ -48,7 +51,7 @@ services:
       context: ./backend
       dockerfile: ./Dockerfile
     container_name: backend
-    restart: no
+    restart: "no"
     depends_on:
       db:
         condition: service_healthy
