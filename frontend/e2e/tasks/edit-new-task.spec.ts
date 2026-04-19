@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { createTask } from "../helpers/tasks";
 
-test("test", async ({ page }) => {
+test("Edit task from the form", async ({ page }) => {
   let taskName = await createTask(page);
   await page.goto("/dashboard/tasks");
   await expect(page.getByText(taskName)).toBeVisible();

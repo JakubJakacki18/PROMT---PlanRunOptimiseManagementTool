@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { createTask } from "../helpers/tasks";
 
-test("Zalogowany user usuwa zadanie po czym zostaje poprawnie usunięte", async ({
+test("User deletes task in task site", async ({
   page,
 }) => {
   const taskName = await createTask(page);
