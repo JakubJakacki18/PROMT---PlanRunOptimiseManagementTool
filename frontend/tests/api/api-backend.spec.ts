@@ -7,7 +7,9 @@ test("GET /api/health/ zwraca 200 i status ok", async ({ request }) => {
   expect(body).toEqual({ status: "ok" });
 });
 
-test("GET /api/projects/ zalogowany admin — zwraca 200 z kluczem results", async ({ request }) => {
+test("GET /api/projects/ zalogowany admin — zwraca 200 z kluczem results", async ({
+  request,
+}) => {
   const response = await request.get("/api/projects/");
   expect(response.status()).toBe(200);
   const body = await response.json();
@@ -15,8 +17,21 @@ test("GET /api/projects/ zalogowany admin — zwraca 200 z kluczem results", asy
   expect(Array.isArray(body.results)).toBe(true);
 });
 
-test("POST /api/tasks/ z poprawnym tytułem — zwraca 201 i id nowego zadania", async ({ request }) => {
+test("POST /api/tasks/ z poprawnym tytułem — zwraca 201 i id nowego zadania", async ({
+  request,
+}) => {
+  const state = await request.storageState();
+  const csrfCookie = state.cookies.find((c) => c.name === "csrftoken");
+  if (!csrfCookie) {
+    throw new Error(
+      "Nie znaleziono ciasteczka csrftoken! Upewnij się, że endpoint ustawia to ciasteczko.",
+    );
+  }
+  const csrfToken = csrfCookie.value;
   const response = await request.post("/api/tasks/", {
+    headers: {
+      "X-CSRFToken": csrfToken,
+    },
     data: { title: "Zadanie z testu API" },
   });
   expect(response.status()).toBe(201);
