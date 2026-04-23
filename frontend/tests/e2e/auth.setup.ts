@@ -7,10 +7,10 @@ import { config as loadEnv } from "dotenv";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const authFile = path.join(__dirname, "../playwright/.auth/admin.json");
+const authFile = path.join(__dirname, "../../playwright/.auth/admin.json");
 const authDir = path.dirname(authFile);
 
-loadEnv({ path: path.join(__dirname, "../../.env") });
+loadEnv({ path: path.join(__dirname, "../../../.env") });
 
 if (!fs.existsSync(authDir)) {
   fs.mkdirSync(authDir, { recursive: true });

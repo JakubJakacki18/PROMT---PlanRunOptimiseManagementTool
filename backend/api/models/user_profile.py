@@ -2,7 +2,6 @@ from django.conf import settings
 from django.core.validators import RegexValidator
 from django.db import models
 
-
 phone_validator = RegexValidator(
     regex=r"^\+?\d{7,15}$",
     message="Phone number must contain 7 to 15 digits and may start with '+'.",
@@ -41,12 +40,15 @@ class UserProfile(models.Model):
         help_text="URL to the user's avatar image - optional",
     )
 
-    def clean(self):
-        super().clean()
-
+    def clean_fields(self, exclude=None):
         if self.phone:
             self.phone = self.phone.strip()
+            for ch in [" ", "-", "(", ")"]:
+                self.phone = self.phone.replace(ch, "")
+        super().clean_fields(exclude=exclude)
 
+    def clean(self):
+        super().clean()
         if self.avatar_url:
             self.avatar_url = self.avatar_url.strip()
 
