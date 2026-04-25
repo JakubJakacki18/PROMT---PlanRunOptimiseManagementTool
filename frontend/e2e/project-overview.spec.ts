@@ -48,3 +48,56 @@ test("R3 — przełącznik wykresów w zakładce Overview przełącza widok", as
   await expect(deliveryTab).toHaveClass(/is-active/);
   await expect(weeklyTab).not.toHaveClass(/is-active/);
 });
+
+// ── API ──────────────────────────────────────────────────────────────────────
+
+test("API — GET /api/projects/{id}/ zwraca wymagane pola projektu", async ({
+  page,
+}) => {
+  const listResp = await page.request.get("/api/projects/?search=Projekt+10");
+  expect(listResp.status()).toBe(200);
+  const list = await listResp.json();
+  const projectId = list.results[0].id;
+
+  const resp = await page.request.get(`/api/projects/${projectId}/`);
+  expect(resp.status()).toBe(200);
+  const project = await resp.json();
+  expect(project).toHaveProperty("id");
+  expect(project).toHaveProperty("name");
+  expect(project).toHaveProperty("status");
+  expect(project).toHaveProperty("start_date");
+  expect(project).toHaveProperty("end_date");
+});
+
+// ── MOCK ─────────────────────────────────────────────────────────────────────
+
+test("Mock — zerowe zadania z mockowanego API pokazują stan 'Brak zadań' w Overview", async ({
+  page,
+}) => {
+  const listResp = await page.request.get("/api/projects/?search=Projekt+10");
+  const list = await listResp.json();
+  const projectId = list.results[0].id;
+
+  await page.route(/\/api\/tasks\//, (route) =>
+    route.fulfill({
+      json: { count: 0, next: null, previous: null, results: [] },
+    }),
+  );
+
+  await page.goto(`/dashboard/projects/${projectId}/overview`);
+  await expect(page.getByText("Brak zadań").first()).toBeVisible({ timeout: 10000 });
+});
+
+// ── AUTH STATE ────────────────────────────────────────────────────────────────
+
+test("Auth — bezpośrednia nawigacja do chronionego URL projektu nie wymaga logowania przez UI", async ({
+  page,
+}) => {
+  const listResp = await page.request.get("/api/projects/?search=Projekt+10");
+  const list = await listResp.json();
+  const projectId = list.results[0].id;
+
+  await page.goto(`/dashboard/projects/${projectId}/overview`);
+  await expect(page).toHaveURL(/overview/);
+  await expect(page.locator(".pov-title")).toBeVisible({ timeout: 10000 });
+});
