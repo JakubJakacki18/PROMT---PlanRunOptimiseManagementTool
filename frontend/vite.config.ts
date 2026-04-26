@@ -19,6 +19,6 @@ export default defineConfig({
     globals: true,
     css: true,
     slowTestThreshold: 2000,
-    exclude: ["**/node_modules/**", "**/e2e/**"],
+    exclude: ["**/node_modules/**", "**/tests/**"],
   },
 });

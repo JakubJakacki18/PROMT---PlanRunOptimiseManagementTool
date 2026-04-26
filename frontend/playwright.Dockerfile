@@ -14,7 +14,7 @@ RUN npm install --save-dev @playwright/test
 
 # Kopiujemy resztę: testy e2e, playwright.config.ts, itd.
 COPY playwright.config.ts ./
-COPY e2e/ ./e2e/
+COPY tests/ ./tests/
 
 # Tworzymy katalog na stan uwierzytelnienia (storageState)
 RUN mkdir -p playwright/.auth

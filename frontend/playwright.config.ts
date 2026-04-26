@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
-  testDir: "./e2e",
+  testDir: "./tests",
   /* Uruchom wszystkie testy sekwencyjnie (ważne przy sesji/CSRF) */
   fullyParallel: false,
   workers: 1,

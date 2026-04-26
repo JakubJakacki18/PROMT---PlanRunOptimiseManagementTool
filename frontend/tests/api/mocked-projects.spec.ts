@@ -23,7 +23,9 @@ test("mockowane projekty — dwa projekty z mocka renderują się jako dwa linki
   page,
 }) => {
   await page.route("/api/projects/**", (route) =>
-    route.fulfill({ json: pagedResponse([makeProject(1, "Alpha"), makeProject(2, "Beta")]) })
+    route.fulfill({
+      json: pagedResponse([makeProject(1, "Alpha"), makeProject(2, "Beta")]),
+    }),
   );
 
   await page.goto("/dashboard/projects");
@@ -36,7 +38,7 @@ test("mockowane projekty — pusta lista nie renderuje żadnego linku Open proje
   page,
 }) => {
   await page.route("/api/projects/**", (route) =>
-    route.fulfill({ json: pagedResponse([]) })
+    route.fulfill({ json: pagedResponse([]) }),
   );
 
   await page.goto("/dashboard/projects");
@@ -44,9 +46,11 @@ test("mockowane projekty — pusta lista nie renderuje żadnego linku Open proje
   await expect(page.getByRole("link", { name: "Open project" })).toHaveCount(0);
 });
 
-test("mockowane projekty — błąd 500 z API nie crashuje aplikacji", async ({ page }) => {
+test("mockowane projekty — błąd 500 z API nie crashuje aplikacji", async ({
+  page,
+}) => {
   await page.route("/api/projects/**", (route) =>
-    route.fulfill({ status: 500, body: "Internal Server Error" })
+    route.fulfill({ status: 500, body: "Internal Server Error" }),
   );
 
   await page.goto("/dashboard/projects");

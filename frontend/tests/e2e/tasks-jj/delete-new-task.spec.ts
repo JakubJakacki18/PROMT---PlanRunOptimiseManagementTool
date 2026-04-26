@@ -1,9 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { createTask } from "../helpers/tasks";
 
-test("User deletes task in task site", async ({
-  page,
-}) => {
+test("User deletes task in task site", async ({ page }) => {
   const taskName = await createTask(page);
   await page.goto("/dashboard/tasks");
   await expect(page.getByText(taskName)).toBeVisible();
