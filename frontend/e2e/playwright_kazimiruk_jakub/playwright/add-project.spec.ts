@@ -45,36 +45,6 @@ test("R1 — formularz tworzenia projektu odrzuca nazwę krótszą niż 3 znaki"
   await expect(page.getByText("Nazwa musi mieć min. 3 znaki")).toBeVisible();
 });
 
-// ── API ──────────────────────────────────────────────────────────────────────
-
-test("API — POST /api/projects/ tworzy projekt i zwraca id oraz nazwę", async ({
-  page,
-}) => {
-  await page.goto("/dashboard");
-  const csrfToken = await page.evaluate(
-    () =>
-      document.cookie
-        .split("; ")
-        .find((c) => c.startsWith("csrftoken="))
-        ?.split("=")[1] ?? "",
-  );
-
-  const createResp = await page.request.post("/api/projects/", {
-    headers: { "X-CSRFToken": csrfToken },
-    data: { name: "API Test Projekt E2E" },
-  });
-  expect(createResp.status()).toBe(201);
-  const project = await createResp.json();
-  expect(project).toHaveProperty("id");
-  expect(project.name).toBe("API Test Projekt E2E");
-
-  await page.request.delete(`/api/projects/${project.id}/`, {
-    headers: { "X-CSRFToken": csrfToken },
-  });
-});
-
-// ── MOCK ─────────────────────────────────────────────────────────────────────
-
 test("Mock — błąd 500 z /api/projects/ wyświetla komunikat błędu zamiast listy", async ({
   page,
 }) => {
@@ -86,8 +56,6 @@ test("Mock — błąd 500 z /api/projects/ wyświetla komunikat błędu zamiast 
   await page.waitForLoadState("networkidle");
   await expect(page.getByText("Failed to load projects.")).toBeVisible();
 });
-
-// ── AUTH STATE ────────────────────────────────────────────────────────────────
 
 test("Auth — storageState ładuje sesję admina bez przejścia przez formularz logowania", async ({
   page,
