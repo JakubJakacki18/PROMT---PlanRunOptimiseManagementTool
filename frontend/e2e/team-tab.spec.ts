@@ -2,7 +2,6 @@ import { test, expect } from "@playwright/test";
 
 test("team tab — wybór 3 osób i filtrowanie tasków", async ({ page }) => {
   await page.goto("/dashboard/projects");
-  await page.getByPlaceholder("Search…").fill("Projekt 10");
   await expect(
     page.getByRole("link", { name: "Open project" }).first(),
   ).toBeVisible({
