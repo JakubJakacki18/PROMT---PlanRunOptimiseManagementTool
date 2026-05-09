@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { createFunding } from "../helpers/fundings";
+import { createFunding } from "../helpers-j_jakacki/fundings";
 
 test("Add task by funding site", async ({ page }) => {
   const fundingName = await createFunding(page);

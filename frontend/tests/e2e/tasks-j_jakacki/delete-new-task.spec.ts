@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { createTask } from "../helpers/tasks";
+import { createTask } from "../helpers-j_jakacki/tasks";
 
 test("User deletes task in task site", async ({ page }) => {
   const taskName = await createTask(page);

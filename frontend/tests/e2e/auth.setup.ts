@@ -16,6 +16,8 @@ if (!fs.existsSync(authDir)) {
   fs.mkdirSync(authDir, { recursive: true });
 }
 
+// Jakub Jakacki & Marek Turkowicz
+
 setup("authenticate as admin", async ({ page }) => {
   await page.goto("/login");
   await page.fill(
