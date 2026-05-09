@@ -40,14 +40,10 @@ test.describe("Task API E2E Tests", () => {
       expect(response.ok()).toBeTruthy();
 
       const responseBody = await response.json();
-
-      // Aserty dotyczące zwróconych danych
       expect(responseBody).toHaveProperty("id");
       expect(responseBody.title).toBe("Analiza architektury systemu");
       expect(responseBody.status).toBe("todo");
       expect(responseBody.priority).toBe(2);
-
-      // Zapisujemy ID do wykorzystania w kolejnych testach
       taskId = responseBody.id;
     },
   );
@@ -57,7 +53,6 @@ test.describe("Task API E2E Tests", () => {
   });
 
   test("powinien pobrać szczegóły utworzonego zadania", async () => {
-    // Upewniamy się, że mamy ID z poprzedniego testu
     expect(taskId).toBeDefined();
 
     const response = await api.get(`${API_URL}${taskId}/`);
@@ -66,6 +61,12 @@ test.describe("Task API E2E Tests", () => {
     const responseBody = await response.json();
     expect(responseBody.id).toBe(taskId);
     expect(responseBody.title).toBe("Analiza architektury systemu");
+    expect(responseBody.status).toBe("todo");
+    expect(responseBody.priority).toBe(2);
+    expect(responseBody.start_date).toBe("2026-05-01");
+    expect(responseBody.due_date).toBe("2026-05-15");
+    expect(responseBody.est_hours).toBe("12.50");
+    expect(responseBody.cost_currency).toBe("PLN");
   });
 
   test("powinien zaktualizować status i priorytet zadania", async () => {
