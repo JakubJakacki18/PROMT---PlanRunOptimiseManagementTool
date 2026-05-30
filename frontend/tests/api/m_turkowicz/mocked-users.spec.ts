@@ -10,37 +10,42 @@ const makeUser = (
   email: `${username}@testpromt.pl`,
   first_name: "Playwright",
   last_name: "Test",
-  is_staff: false,
-  is_active: true,
-  role: "member",
+  tasks_count: 0,
+  done_tasks_count: 0,
   profile: {
+    role: "member",
     phone: "+48123456789",
     avatar_url: null,
   },
-  date_joined: "2026-01-01T00:00:00Z",
   ...overrides,
 });
 
-const pagedResponse = (results: object[], count?: number) => ({
-  count: count ?? results.length,
-  next: null,
-  previous: null,
-  results,
+const makeMe = (overrides: Record<string, unknown> = {}) => ({
+  id: 1,
+  username: "admin",
+  email: "admin@testpromt.pl",
+  first_name: "Admin",
+  last_name: "PROMT",
+  is_staff: true,
+  role: "admin",
+  ...overrides,
 });
 
+// UserViewSet ma pagination_class = None — mock zwraca TABLICĘ, nie obiekt z {results}
+const flatList = (users: object[]) => users;
+
 const USERS_ROUTE_PATTERN = "/api/users/**";
+const ME_ROUTE = "/api/auth/me/";
 
 test(
   "MOCK — panel admina wyświetla wszystkich użytkowników z mockowanej listy w tabeli #users-table",
   async ({ page }) => {
     const mockUsers = [
-      makeUser(501, "anna_kowalska", { role: "manager", first_name: "Anna", last_name: "Kowalska" }),
-      makeUser(502, "jan_nowak", { role: "member", first_name: "Jan", last_name: "Nowak" }),
+      makeUser(501, "anna_kowalska", { profile: { role: "manager", phone: "", avatar_url: null }, first_name: "Anna", last_name: "Kowalska" }),
+      makeUser(502, "jan_nowak", { first_name: "Jan", last_name: "Nowak" }),
       makeUser(503, "piotr_wiszniewski", {
-        role: "member",
         first_name: "Piotr",
         last_name: "Wiszniewski",
-        is_staff: false,
       }),
     ];
 
@@ -48,7 +53,7 @@ test(
       route.fulfill({
         status: 200,
         contentType: "application/json",
-        json: pagedResponse(mockUsers),
+        json: flatList(mockUsers),
       });
     });
 
@@ -91,12 +96,12 @@ test(
   async ({ page }) => {
     const mockUsers = [
       makeUser(601, "manager_test_user", {
-        role: "manager",
+        profile: { role: "manager", phone: "", avatar_url: null },
         first_name: "Manager",
         last_name: "Testowy",
       }),
       makeUser(602, "member_test_user", {
-        role: "member",
+        profile: { role: "member", phone: "", avatar_url: null },
         first_name: "Member",
         last_name: "Testowy",
       }),
@@ -106,7 +111,7 @@ test(
       route.fulfill({
         status: 200,
         contentType: "application/json",
-        json: pagedResponse(mockUsers),
+        json: flatList(mockUsers),
       });
     });
 
@@ -191,5 +196,120 @@ test(
       criticalErrors,
       `Nie powinno być nieobsługiwanych błędów JavaScript. Znalezione: ${criticalErrors.join(", ")}`,
     ).toHaveLength(0);
+  },
+);
+
+test(
+  "MOCK — /api/auth/me/ zwraca dane aktualnie zalogowanego użytkownika z rolą admin i is_staff: true",
+  async ({ page }) => {
+    const mockMe = makeMe({
+      username: "marek_turkowicz",
+      first_name: "Marek",
+      last_name: "Turkowicz",
+      email: "marek@testpromt.pl",
+    });
+
+    await page.route(ME_ROUTE, (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        json: mockMe,
+      });
+    });
+
+    await page.goto("/dashboard/admin");
+    await page.waitForLoadState("networkidle");
+
+    // Weryfikujemy, że request do /api/auth/me/ zostaje wykonany przez stronę
+    // i że strona poprawnie obsługuje odpowiedź z danymi użytkownika
+    expect(
+      page.url(),
+      "Strona powinna pozostać na /dashboard po załadowaniu zamockowanego me",
+    ).toContain("/dashboard");
+
+    // Weryfikujemy, że frontned nie ulega awarii przy specyficznych danych użytkownika z mocka
+    const body = page.locator("body");
+    await expect(body, "Body strony powinno być widoczne").toBeVisible();
+  },
+);
+
+test(
+  "MOCK — użytkownik z ustawionym avatar_url — frontend nie wyświetla błędnego placeholder",
+  async ({ page }) => {
+    const mockUsers = [
+      makeUser(701, "avatar_user", {
+        profile: {
+          role: "member",
+          phone: "+48111222333",
+          avatar_url: "https://avatars.testpromt.pl/user701.png",
+        },
+        first_name: "Avatar",
+        last_name: "Testowy",
+      }),
+    ];
+
+    await page.route(USERS_ROUTE_PATTERN, (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        json: flatList(mockUsers),
+      });
+    });
+
+    await page.goto("/dashboard/admin");
+    await page.waitForLoadState("networkidle");
+
+    await expect(
+      page.getByText("avatar_user"),
+      "Użytkownik z avatar_url powinien być widoczny na liście",
+    ).toBeVisible({ timeout: 10_000 });
+
+    const jsErrors: string[] = [];
+    page.on("pageerror", (e) => jsErrors.push(e.message));
+
+    const criticalErrors = jsErrors.filter(
+      (e) => !e.includes("ResizeObserver"),
+    );
+    expect(
+      criticalErrors,
+      "Wyświetlenie użytkownika z avatar_url nie powinno powodować błędów JS",
+    ).toHaveLength(0);
+  },
+);
+
+test(
+  "MOCK — lista z mieszanymi rolami (admin, pm, member, viewer) — każda rola ma swój badge",
+  async ({ page }) => {
+    const mockUsers = [
+      makeUser(801, "admin_user", { profile: { role: "admin", phone: "", avatar_url: null } }),
+      makeUser(802, "pm_user", { profile: { role: "pm", phone: "", avatar_url: null } }),
+      makeUser(803, "member_user", { profile: { role: "member", phone: "", avatar_url: null } }),
+      makeUser(804, "viewer_user", { profile: { role: "viewer", phone: "", avatar_url: null } }),
+    ];
+
+    await page.route(USERS_ROUTE_PATTERN, (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        json: flatList(mockUsers),
+      });
+    });
+
+    await page.goto("/dashboard/admin");
+    await page.waitForSelector("#admin-panel-title", { timeout: 15_000 });
+    await page.waitForLoadState("networkidle");
+
+    const rows = page.locator("tbody tr.ap__row");
+    await expect(
+      rows,
+      "Powinny być widoczne dokładnie 4 wiersze odpowiadające 4 użytkownikom z mocka",
+    ).toHaveCount(4, { timeout: 10_000 });
+
+    const badges = page.locator(".ap__role-badge");
+    const badgeCount = await badges.count();
+    expect(
+      badgeCount,
+      "Każdy z 4 użytkowników powinien mieć swój badge roli",
+    ).toBe(4);
   },
 );

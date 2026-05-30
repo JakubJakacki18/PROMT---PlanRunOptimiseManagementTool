@@ -32,7 +32,18 @@ export default defineConfig({
       testMatch: /.*\.setup\.ts/,
     },
 
-    // ── Projekt testowy: korzysta z gotowej sesji ──
+    // ── Backend API: testy API (request fixture) — pliki w backend/playwright-api/ ──
+    // Używa tej samej sesji co projekt chromium (storageState z setup).
+    {
+      name: "backend-api",
+      testDir: "../backend/playwright-api",
+      use: {
+        storageState: "playwright/.auth/admin.json",
+      },
+      dependencies: ["setup"],
+    },
+
+    // ── Frontend E2E: mockowanie i zarządzanie sesją — pliki w frontend/tests/ ──
     {
       name: "chromium",
       use: {

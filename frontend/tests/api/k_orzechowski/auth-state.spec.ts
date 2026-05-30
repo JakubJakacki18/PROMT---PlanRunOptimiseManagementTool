@@ -20,3 +20,28 @@ test("storageState — sesja admina daje dostęp do /dashboard/fundings bez logo
   expect(csrf).toBeDefined();
   expect(csrf!.value.length).toBeGreaterThan(32);
 });
+
+test("storageState — sesja admina pozwala odpytać /api/fundings/ przez request fixture bez przechodzenia przez UI", async ({
+  request,
+}) => {
+  const response = await request.get("/api/fundings/");
+  expect(response.status()).toBe(200);
+  const body = await response.json();
+  expect(body).toHaveProperty("results");
+  expect(Array.isArray(body.results)).toBe(true);
+});
+
+test("storageState — nieuwierzytelniony request do /api/fundings/ zwraca 401 lub 403", async ({
+  playwright,
+}) => {
+  const anonRequest = await playwright.request.newContext({
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:5173",
+  });
+
+  try {
+    const response = await anonRequest.get("/api/fundings/");
+    expect([401, 403]).toContain(response.status());
+  } finally {
+    await anonRequest.dispose();
+  }
+});

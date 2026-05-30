@@ -53,7 +53,21 @@ test.describe("Mockowanie obiektów Task", () => {
   await page.goto("/dashboard/tasks");
   await page.waitForLoadState("networkidle");
   const error = page.locator(".error");
-await expect(error).toBeVisible();
+  await expect(error).toBeVisible();
   await expect(page.getByText("Nie udało się wczytać zadań.")).toBeVisible();
 });
+
+  test("mockowane zadania — pusta lista nie wyświetla żadnych zadań", async ({ page }) => {
+    await page.route(API_URL, (route) =>
+      route.fulfill({
+        json: pagedResponse([]),
+      }),
+    );
+
+    await page.goto("/dashboard/tasks");
+    await page.waitForLoadState("networkidle");
+
+    await expect(page.getByText("nietypowezadanie")).not.toBeVisible();
+    await expect(page.locator("body")).toBeVisible();
+  });
 });
