@@ -8,7 +8,8 @@
 
 .dash-page {
   background: var(--bg);
-  padding: 16px;padding-bottom: 0;
+  padding: 16px;
+  padding-bottom: 0;
   padding-top: 0;
   font-family: system-ui, sans-serif;
 }
@@ -244,8 +245,17 @@
   content: "";
   position: absolute;
   inset: -40px;
-  background: radial-gradient(circle at top right, rgba(79, 70, 229, 0.18), transparent 55%),
-    radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.14), transparent 55%);
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(79, 70, 229, 0.18),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at bottom left,
+      rgba(14, 165, 233, 0.14),
+      transparent 55%
+    );
   pointer-events: none;
 }
 .dash-ai__desc {
@@ -333,7 +343,9 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  transition: 0.15s transform, 0.15s background;
+  transition:
+    0.15s transform,
+    0.15s background;
 }
 .qa:hover {
   transform: translateY(-1px);
@@ -501,16 +513,29 @@
   border-radius: 6px;
   border: 1px solid #e2e8f0;
   background: #f1f5f9;
-  transition: 0.12s transform, 0.12s filter;
+  transition:
+    0.12s transform,
+    0.12s filter;
 }
 .heatmap__cell:hover {
   transform: translateY(-1px);
   filter: brightness(0.98);
 }
-.heatmap__cell.l0 { background: #f1f5f9; }
-.heatmap__cell.l1 { background: #e0e7ff; border-color: #c7d2fe; }
-.heatmap__cell.l2 { background: #c7d2fe; border-color: #a5b4fc; }
-.heatmap__cell.l3 { background: #818cf8; border-color: #6366f1; }
+.heatmap__cell.l0 {
+  background: #f1f5f9;
+}
+.heatmap__cell.l1 {
+  background: #e0e7ff;
+  border-color: #c7d2fe;
+}
+.heatmap__cell.l2 {
+  background: #c7d2fe;
+  border-color: #a5b4fc;
+}
+.heatmap__cell.l3 {
+  background: #818cf8;
+  border-color: #6366f1;
+}
 
 .heatmap__legend {
   display: flex;
@@ -526,10 +551,21 @@
   border: 1px solid #e2e8f0;
   background: #f1f5f9;
 }
-.heatmap__dot.l0 { background: #f1f5f9; }
-.heatmap__dot.l1 { background: #e0e7ff; border-color: #c7d2fe; }
-.heatmap__dot.l2 { background: #c7d2fe; border-color: #a5b4fc; }
-.heatmap__dot.l3 { background: #818cf8; border-color: #6366f1; }
+.heatmap__dot.l0 {
+  background: #f1f5f9;
+}
+.heatmap__dot.l1 {
+  background: #e0e7ff;
+  border-color: #c7d2fe;
+}
+.heatmap__dot.l2 {
+  background: #c7d2fe;
+  border-color: #a5b4fc;
+}
+.heatmap__dot.l3 {
+  background: #818cf8;
+  border-color: #6366f1;
+}
 
 /* responsive */
 @media (max-width: 1020px) {

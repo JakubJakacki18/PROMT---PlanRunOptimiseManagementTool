@@ -39,7 +39,7 @@ const FundingEditSchema = z
       .optional()
       .refine(
         (v) => v === undefined || v === "" || /^\d+(?:[.,]\d{1,2})?$/.test(v),
-        "Kwota musi być liczbą (max 2 miejsca po przecinku)"
+        "Kwota musi być liczbą (max 2 miejsca po przecinku)",
       ),
     currency: z
       .string()

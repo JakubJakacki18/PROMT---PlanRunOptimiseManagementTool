@@ -3,15 +3,14 @@ import { axiosBaseQuery } from "../../app/axiosBaseQuery";
 
 export type ID = number;
 
-
 export interface ProjectFunding {
   id: ID;
   project: ID;
   funding: ID;
 
-  allocation_start?: string | null; 
-  allocation_end?: string | null;   
-  created_at?: string;              
+  allocation_start?: string | null;
+  allocation_end?: string | null;
+  created_at?: string;
 }
 interface Paged<T> {
   count: number;
@@ -34,8 +33,10 @@ export const projectFundingApi = createApi({
   baseQuery: axiosBaseQuery(),
   tagTypes: ["ProjectFunding"],
   endpoints: (b) => ({
-
-    listProjectFundings: b.query<Paged<ProjectFunding>, ProjectFundingListParams | void>({
+    listProjectFundings: b.query<
+      Paged<ProjectFunding>,
+      ProjectFundingListParams | void
+    >({
       query: (params) => {
         const p = new URLSearchParams();
 
@@ -47,7 +48,8 @@ export const projectFundingApi = createApi({
         }
 
         if (params?.page != null) p.set("page", String(params.page));
-        if (params?.page_size != null) p.set("page_size", String(params.page_size));
+        if (params?.page_size != null)
+          p.set("page_size", String(params.page_size));
         if (params?.limit != null) p.set("limit", String(params.limit));
         if (params?.offset != null) p.set("offset", String(params.offset));
 
@@ -69,7 +71,10 @@ export const projectFundingApi = createApi({
           : [{ type: "ProjectFunding" as const, id: "LIST" }],
     }),
 
-    createProjectFunding: b.mutation<ProjectFunding, { project: ID; funding: ID }>({
+    createProjectFunding: b.mutation<
+      ProjectFunding,
+      { project: ID; funding: ID }
+    >({
       query: (body) => ({
         url: "/api/project-fundings/",
         method: "POST",

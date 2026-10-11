@@ -14,4 +14,3 @@ export const healthApi = createApi({
 });
 
 export const { useHealthQuery } = healthApi;
-

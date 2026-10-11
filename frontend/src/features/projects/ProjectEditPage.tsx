@@ -23,7 +23,7 @@ const ProjectSchema = z
     {
       path: ["end_date"],
       message: "Start date must be before or equal to end date",
-    }
+    },
   );
 
 type ProjectForm = z.infer<typeof ProjectSchema>;
@@ -197,7 +197,7 @@ export default function ProjectEditPage() {
                 {
                   shouldValidate: true,
                   shouldDirty: true,
-                }
+                },
               );
             }}
             value={watch("owner") ?? ""}

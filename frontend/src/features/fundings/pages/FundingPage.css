@@ -15,7 +15,9 @@
   border: 1px solid transparent;
   background: transparent;
   color: #172439;
-  transition: 0.15s background, 0.15s color;
+  transition:
+    0.15s background,
+    0.15s color;
 
   min-width: 130px;
   white-space: nowrap;

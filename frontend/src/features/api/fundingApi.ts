@@ -117,9 +117,8 @@ export const fundingsApi = createApi({
         url: "/api/fundings/?ordering=name&page_size=100",
         method: "GET",
       }),
-      transformResponse: (
-        data: Paged<{ id: number; name: string }>
-      ) => data.results,
+      transformResponse: (data: Paged<{ id: number; name: string }>) =>
+        data.results,
       providesTags: ["FundingPick"],
     }),
   }),

@@ -46,7 +46,9 @@
   background: transparent;
   color: #475569;
   cursor: pointer;
-  transition: 0.15s background, 0.15s color;
+  transition:
+    0.15s background,
+    0.15s color;
 }
 .btn:hover {
   background: #f1f5f9;
@@ -126,13 +128,11 @@
   color: var(--ink);
 }
 
-
 .header-actions {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-
 
 .form-input {
   border: 1px solid #cbd5e1;
@@ -140,7 +140,7 @@
   padding: 10px 12px;
   font-size: 0.95rem;
   outline: none;
-  height: 40px;           
+  height: 40px;
   box-sizing: border-box;
 }
 .form-input:focus {
@@ -152,14 +152,14 @@
   background: var(--primary);
   color: #fff;
   border-radius: 10px;
-  padding: 10px 14px;      
+  padding: 10px 14px;
   border: 1px solid transparent;
   cursor: pointer;
   transition: background-color 0.15s ease;
   font-weight: 600;
-  font-size: 0.95rem;      
-  height: 40px;            
-  line-height: 1;          
+  font-size: 0.95rem;
+  height: 40px;
+  line-height: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;

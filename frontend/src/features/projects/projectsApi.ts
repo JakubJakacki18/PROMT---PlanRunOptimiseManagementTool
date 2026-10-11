@@ -33,7 +33,7 @@ export const projectsApi = createApi({
     }),
 
     getById: b.query<Project, number>({
-        query: (id) => ({ url: `/api/projects/${id}/` }),
+      query: (id) => ({ url: `/api/projects/${id}/` }),
       providesTags: (_res, _err, id) => [{ type: "Project", id }],
     }),
     update: b.mutation<Project, { id: number; patch: Partial<Project> }>({

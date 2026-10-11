@@ -35,7 +35,9 @@
   border-radius: 6px;
   text-decoration: none;
   color: #444;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 
 .dashboard__link.active {
@@ -52,4 +54,11 @@
 /* Główna sekcja */
 .dashboard__content {
   padding: 24px;
+}
+
+/* Sidebar divider for admin section */
+.sidebar-divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 12px 0;
 }

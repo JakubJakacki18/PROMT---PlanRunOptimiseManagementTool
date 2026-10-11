@@ -16,6 +16,12 @@ import {
 } from "recharts";
 
 import "./ProjectOverviewTab.css";
+import {
+  buildCycleBuckets,
+  computeMedian,
+  computeAverage,
+  type CycleBucket,
+} from "../deliveryUtils";
 
 type DailyActivityPoint = {
   date: string;
@@ -26,11 +32,6 @@ type DailyActivityPoint = {
 
 type WeekdayStat = {
   weekday: number;
-  label: string;
-  count: number;
-};
-
-type CycleBucket = {
   label: string;
   count: number;
 };
@@ -103,7 +104,7 @@ function isHighPriority(priority: TaskPriority | null | undefined): boolean {
 function isOutsideProjectRange(
   task: Task,
   projectStart: string | null | undefined,
-  projectEnd: string | null | undefined
+  projectEnd: string | null | undefined,
 ): boolean {
   if (!projectStart && !projectEnd) return false;
 
@@ -129,7 +130,7 @@ function isOverdue(
   task: Task,
   todayStart: Date,
   projectStart: string | null | undefined,
-  projectEnd: string | null | undefined
+  projectEnd: string | null | undefined,
 ): boolean {
   if (isDone(task.status)) return false;
 
@@ -223,20 +224,20 @@ export default function ProjectOverviewTab() {
     const highPriority = tasks.filter((t) => isHighPriority(t.priority)).length;
 
     const overdue = tasks.filter((t) =>
-      isOverdue(t, todayStart, project.start_date, project.end_date)
+      isOverdue(t, todayStart, project.start_date, project.end_date),
     ).length;
 
     const noStartDate = tasks.filter((t) => !t.start_date).length;
     const noDueDate = tasks.filter((t) => !t.due_date).length;
 
     const missingDatesCountCalc = tasks.filter(
-      (t) => !t.start_date || !t.due_date
+      (t) => !t.start_date || !t.due_date,
     ).length;
 
     const highPriorityOverdueCountCalc = tasks.filter(
       (t) =>
         isHighPriority(t.priority) &&
-        isOverdue(t, todayStart, project.start_date, project.end_date)
+        isOverdue(t, todayStart, project.start_date, project.end_date),
     ).length;
 
     const completion = totalCount === 0 ? 0 : done / Math.max(totalCount, 1);
@@ -311,7 +312,7 @@ export default function ProjectOverviewTab() {
         weekday,
         label: weekdayLabel(weekday),
         count,
-      })
+      }),
     );
 
     // Wynik ryzyka
@@ -343,12 +344,12 @@ export default function ProjectOverviewTab() {
         todayStart.getTime() > projEnd.getTime()
           ? projEnd
           : todayStart.getTime() < projStart.getTime()
-          ? projStart
-          : todayStart;
+            ? projStart
+            : todayStart;
       const elapsedDays = clamp(
         daysBetween(projStart, clampedToday),
         0,
-        totalDays
+        totalDays,
       );
       timeProgressPctCalc = Math.round((elapsedDays / totalDays) * 100);
       scheduleDeltaPctCalc = taskProgressPctCalc - timeProgressPctCalc;
@@ -394,35 +395,16 @@ export default function ProjectOverviewTab() {
     });
 
     let avgCycleTimeCalc: number | null = null;
-    let medianCycleTimeCalc: number | null = null;
     let maxCycleTimeCalc: number | null = null;
 
-    const cycleBucketsCalc: CycleBucket[] = [
-      { label: "0–1d", count: 0 },
-      { label: "2–3d", count: 0 },
-      { label: "4–7d", count: 0 },
-      { label: "8+d", count: 0 },
-    ];
+    const medianCycleTimeCalc = computeMedian(cycleDurations);
+    const cycleBucketsCalc = buildCycleBuckets(cycleDurations);
 
     if (cycleDurations.length > 0) {
-      const sum = cycleDurations.reduce((acc, d) => acc + d, 0);
-      avgCycleTimeCalc = sum / cycleDurations.length;
+      avgCycleTimeCalc = computeAverage(cycleDurations);
 
       const sorted = [...cycleDurations].sort((a, b) => a - b);
-      const mid = Math.floor(sorted.length / 2);
-      medianCycleTimeCalc =
-        sorted.length % 2 === 0
-          ? (sorted[mid - 1] + sorted[mid]) / 2
-          : sorted[mid];
-
       maxCycleTimeCalc = sorted[sorted.length - 1];
-
-      cycleDurations.forEach((d) => {
-        if (d <= 1) cycleBucketsCalc[0].count += 1;
-        else if (d <= 3) cycleBucketsCalc[1].count += 1;
-        else if (d <= 7) cycleBucketsCalc[2].count += 1;
-        else cycleBucketsCalc[3].count += 1;
-      });
     }
 
     const recentSorted = [...tasks].sort((a, b) => {
@@ -478,10 +460,10 @@ export default function ProjectOverviewTab() {
     momentumTrend === "up"
       ? "Momentum rośnie"
       : momentumTrend === "down"
-      ? "Momentum spada"
-      : momentumTrend === "stable"
-      ? "Momentum stabilne"
-      : "Za mało danych";
+        ? "Momentum spada"
+        : momentumTrend === "stable"
+          ? "Momentum stabilne"
+          : "Za mało danych";
 
   const hasCycleData =
     avgCycleTime !== null &&
@@ -499,19 +481,19 @@ export default function ProjectOverviewTab() {
     riskLevel === "healthy"
       ? "W większości pod kontrolą – obserwuj przeterminowane zadania i brakujące daty."
       : riskLevel === "warning"
-      ? "Są zauważalne problemy – skup się na przeterminowanych i wysokopriorytetowych zadaniach."
-      : "Wysokie ryzyko – dużo przeterminowanych lub słabo zdefiniowanych zadań; projekt wymaga uwagi.";
+        ? "Są zauważalne problemy – skup się na przeterminowanych i wysokopriorytetowych zadaniach."
+        : "Wysokie ryzyko – dużo przeterminowanych lub słabo zdefiniowanych zadań; projekt wymaga uwagi.";
 
   const workloadHint =
     statusTotal === 0
       ? "Brak zadań – dodaj pierwsze, aby zobaczyć przepływ pracy."
       : doingCount > todoCount && doingCount > doneCount
-      ? "Dużo w toku – zwróć uwagę na blokery i przepływ."
-      : todoCount > doingCount && todoCount > doneCount
-      ? "Backlog dominuje – rozważ priorytety i start kluczowych zadań."
-      : doneCount > todoCount && doneCount > doingCount
-      ? "Duża część gotowa – jesteś blisko końca."
-      : "Praca dość równomiernie rozłożona.";
+        ? "Dużo w toku – zwróć uwagę na blokery i przepływ."
+        : todoCount > doingCount && todoCount > doneCount
+          ? "Backlog dominuje – rozważ priorytety i start kluczowych zadań."
+          : doneCount > todoCount && doneCount > doingCount
+            ? "Duża część gotowa – jesteś blisko końca."
+            : "Praca dość równomiernie rozłożona.";
 
   const riskInlineNote = `${riskMessage} • ${workloadHint}`;
 
@@ -591,8 +573,8 @@ export default function ProjectOverviewTab() {
               {riskLevel === "healthy"
                 ? "Zdrowo"
                 : riskLevel === "warning"
-                ? "Uwaga"
-                : "Krytycznie"}
+                  ? "Uwaga"
+                  : "Krytycznie"}
             </span>
             <span className="pov-mood-score">{riskScore}/100</span>
           </div>

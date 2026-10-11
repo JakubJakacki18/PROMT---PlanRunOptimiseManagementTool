@@ -13,12 +13,13 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-
 from datetime import timedelta
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BACKEND_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = BACKEND_DIR.parent
+
+IN_DOCKER = os.path.exists("/.dockerenv")
 load_dotenv(BASE_DIR / ".env")
 
 # Quick-start development settings - unsuitable for production
@@ -30,8 +31,11 @@ SECRET_KEY = os.getenv("SECRET_KEY", "dev-insecure")  # w DEV może mieć fallba
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
-# ALLOWED_HOSTS z CSV -> lista
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+# ALLOWED_HOSTS — w DEBUG akceptujemy wszystko (Docker hostnames etc.)
+if DEBUG:
+    ALLOWED_HOSTS = ["*"]
+else:
+    ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
 
 # Application definition
@@ -76,13 +80,17 @@ REST_FRAMEWORK = {
     ),
 }
 
+FRONTEND_PORT = os.getenv("FRONTEND_PORT", "5173")
+
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
+    f"http://localhost:{FRONTEND_PORT}",
+    f"http://frontend:{FRONTEND_PORT}",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
+    f"http://localhost:{FRONTEND_PORT}",
+    f"http://frontend:{FRONTEND_PORT}",
 ]
 
 # DEV (localhost, bez HTTPS)
@@ -137,8 +145,16 @@ DATABASES = {
         "NAME": os.getenv("DB_NAME", "promt_db"),
         "USER": os.getenv("DB_USER", "promt_user"),
         "PASSWORD": os.getenv("DB_PASSWORD", ""),
-        "HOST": os.getenv("DB_HOST", "localhost"),
-        "PORT": os.getenv("DB_PORT", "5432"),
+        "HOST": (
+            os.getenv("DB_HOST", "db")
+            if IN_DOCKER
+            else os.getenv("LOCAL_DB_HOST", "localhost")
+        ),
+        "PORT": (
+            os.getenv("DB_PORT", "5432")
+            if IN_DOCKER
+            else os.getenv("LOCAL_DB_PORT", "5432")
+        ),
     }
 }
 

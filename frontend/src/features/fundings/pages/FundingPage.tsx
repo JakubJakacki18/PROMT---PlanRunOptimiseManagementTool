@@ -61,7 +61,7 @@ export default function FundingsPage() {
       ordering,
       search: search.trim() || undefined,
     }),
-    [ordering, search]
+    [ordering, search],
   );
 
   const { data, isLoading, error, refetch } = useListFundingsQuery(params);
@@ -72,7 +72,7 @@ export default function FundingsPage() {
     if (activeType === "all") return items;
     return items.filter(
       (f): f is Funding & { type: NonNullable<Funding["type"]> } =>
-        !!f.type && f.type === activeType
+        !!f.type && f.type === activeType,
     );
   }, [items, activeType]);
 
@@ -265,7 +265,7 @@ function FundingAccordionItem({
     isFetching,
     isLoading,
   } = useListTasksQuery(
-    open ? { funding: funding.id, ordering: "-created_at", page } : undefined
+    open ? { funding: funding.id, ordering: "-created_at", page } : undefined,
   );
 
   return (
@@ -288,7 +288,7 @@ function FundingAccordionItem({
             {funding.amount_total &&
               chip(
                 "chip--sky",
-                `${funding.amount_total} ${funding.currency ?? "PLN"}`
+                `${funding.amount_total} ${funding.currency ?? "PLN"}`,
               )}
             {funding.start_date && (
               <span className="meta-text">
@@ -466,8 +466,8 @@ function FundingTaskRow({
     statusSafe === "done"
       ? "chip--green"
       : statusSafe === "doing"
-      ? "chip--amber"
-      : "chip--gray";
+        ? "chip--amber"
+        : "chip--gray";
 
   const STATUS_LABEL_PL: Record<"todo" | "doing" | "done", string> = {
     todo: "DO ZROBIENIA",
@@ -479,8 +479,8 @@ function FundingTaskRow({
     t.priority >= 3
       ? chip("chip--red", "Wysoki")
       : t.priority === 2
-      ? chip("chip--amber", "Średni")
-      : chip("chip--sky", "Niski");
+        ? chip("chip--amber", "Średni")
+        : chip("chip--sky", "Niski");
 
   return (
     <div className="task-card">

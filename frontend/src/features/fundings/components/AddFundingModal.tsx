@@ -24,7 +24,7 @@ const FundingCreateSchema = z
       .optional()
       .refine(
         (v) => v === undefined || v === "" || /^\d+(?:[.,]\d{1,2})?$/.test(v),
-        "Kwota musi być liczbą (max 2 miejsca po przecinku)"
+        "Kwota musi być liczbą (max 2 miejsca po przecinku)",
       ),
     currency: z
       .string()
@@ -189,8 +189,11 @@ export default function AddFundingModal({
               {generalOpen && (
                 <div className="acc-body">
                   <div className="field">
-                    <label className="form-label">Nazwa</label>
+                    <label className="form-label" htmlFor="name">
+                      Nazwa
+                    </label>
                     <input
+                      id="name"
                       className={`form-input ${
                         errors.name ? "input-invalid" : ""
                       }`}
@@ -207,18 +210,36 @@ export default function AddFundingModal({
 
                   <div className="grid-2 mt-10">
                     <div className="field">
-                      <label className="form-label">Program</label>
-                      <input className="form-input" {...register("program")} />
+                      <label className="form-label" htmlFor="program">
+                        Program
+                      </label>
+                      <input
+                        className="form-input"
+                        id="program"
+                        {...register("program")}
+                      />
                     </div>
                     <div className="field">
-                      <label className="form-label">Finansujący</label>
-                      <input className="form-input" {...register("funder")} />
+                      <label className="form-label" htmlFor="funder">
+                        Finansujący
+                      </label>
+                      <input
+                        className="form-input"
+                        id="funder"
+                        {...register("funder")}
+                      />
                     </div>
                   </div>
 
                   <div className="field mt-10">
-                    <label className="form-label">Typ</label>
-                    <select className="form-select" {...register("type")}>
+                    <label className="form-label" htmlFor="type">
+                      Typ
+                    </label>
+                    <select
+                      className="form-select"
+                      id="type"
+                      {...register("type")}
+                    >
                       <option value="">Wybierz…</option>
                       <option value="grant">Grant</option>
                       <option value="sponsorship">Sponsorowanie</option>
@@ -249,8 +270,11 @@ export default function AddFundingModal({
                 <div className="acc-body">
                   <div className="grid-3">
                     <div className="field">
-                      <label className="form-label">Kwota</label>
+                      <label className="form-label" htmlFor="amount_total">
+                        Kwota
+                      </label>
                       <input
+                        id="amount_total"
                         className={`form-input ${
                           errors.amount_total ? "input-invalid" : ""
                         }`}
@@ -267,8 +291,11 @@ export default function AddFundingModal({
                     </div>
 
                     <div className="field">
-                      <label className="form-label">Waluta</label>
+                      <label className="form-label" htmlFor="currency">
+                        Waluta
+                      </label>
                       <input
+                        id="currency"
                         className={`form-input ${
                           errors.currency ? "input-invalid" : ""
                         }`}
@@ -311,23 +338,29 @@ export default function AddFundingModal({
                 <div className="acc-body">
                   <div className="grid-3-dates">
                     <div className="field">
-                      <label className="form-label">Start</label>
+                      <label className="form-label" htmlFor="start_date">
+                        Start
+                      </label>
                       <input
+                        id="start_date"
                         type="date"
                         className="form-input"
-                        {...register("start_date")}
+                        {...register("start_date", { deps: ["end_date"] })}
                       />
                     </div>
 
                     <div className="field">
-                      <label className="form-label">Koniec</label>
+                      <label className="form-label" htmlFor="end_date">
+                        Koniec
+                      </label>
                       <input
+                        id="end_date"
                         type="date"
                         className={`form-input ${
                           errors.end_date ? "input-invalid" : ""
                         }`}
                         aria-invalid={!!errors.end_date}
-                        {...register("end_date")}
+                        {...register("end_date", { deps: ["start_date"] })}
                       />
                       {errors.end_date && (
                         <p className="error-text">
@@ -337,8 +370,14 @@ export default function AddFundingModal({
                     </div>
 
                     <div className="field">
-                      <label className="form-label">Termin raportu</label>
+                      <label
+                        className="form-label"
+                        htmlFor="reporting_deadline"
+                      >
+                        Termin raportu
+                      </label>
                       <input
+                        id="reporting_deadline"
                         type="date"
                         className="form-input"
                         {...register("reporting_deadline")}

@@ -204,7 +204,7 @@ export default function ProjectTimelineTab() {
   const timelineRef = useRef<Timeline | null>(null);
   const itemsDSRef = useRef(new DataSet<DataItem>());
   const groupsDSRef = useRef(
-    new DataSet<{ id: IdType; content: string; order?: number }>()
+    new DataSet<{ id: IdType; content: string; order?: number }>(),
   );
   const dragRectRef = useRef<HTMLDivElement | null>(null);
 
@@ -229,12 +229,12 @@ export default function ProjectTimelineTab() {
   const [filterText, setFilterText] = useState("");
   const normalizedFilter = useMemo(
     () => filterText.trim().toLowerCase(),
-    [filterText]
+    [filterText],
   );
 
   const [statusFilter, setStatusFilter] = useState<TaskStatus | "all">("all");
   const [priorityFilter, setPriorityFilter] = useState<PriorityLabel | "all">(
-    "all"
+    "all",
   );
 
   const [addingOnTimeline, setAddingOnTimeline] = useState(false);
@@ -249,7 +249,7 @@ export default function ProjectTimelineTab() {
 
   const [hoverTask, setHoverTask] = useState<Task | null>(null);
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(
-    null
+    null,
   );
   const hoverLockedRef = useRef(false);
   const hoverHideTimeoutRef = useRef<number | null>(null);
@@ -264,7 +264,7 @@ export default function ProjectTimelineTab() {
 
   const priorityOptions: PriorityLabel[] = useMemo(
     () => ["Low", "Medium", "High"],
-    []
+    [],
   );
 
   const { scheduled, unscheduled } = useMemo(() => {
@@ -291,7 +291,7 @@ export default function ProjectTimelineTab() {
     }
     const arr = Array.from(map.values());
     arr.sort((a, b) =>
-      a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+      a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
     );
     return arr;
   }, [tasks]);
@@ -476,11 +476,11 @@ export default function ProjectTimelineTab() {
     if (!tlRoot) return;
 
     const groupEls = Array.from(
-      tlRoot.querySelectorAll(".vis-itemset .vis-group[data-groupid]")
+      tlRoot.querySelectorAll(".vis-itemset .vis-group[data-groupid]"),
     ) as HTMLElement[];
 
     const labelEls = Array.from(
-      tlRoot.querySelectorAll(".vis-labelset .vis-label[data-groupid]")
+      tlRoot.querySelectorAll(".vis-labelset .vis-label[data-groupid]"),
     ) as HTMLElement[];
 
     const hById = new Map<string, number>();
@@ -587,7 +587,7 @@ export default function ProjectTimelineTab() {
               const arr = draft?.results ?? [];
               const i = arr.findIndex((t) => t.id === tid);
               if (i !== -1) arr[i] = { ...arr[i], ...patch };
-            })
+            }),
           );
 
           updateTask({ id: tid, patch })
@@ -622,7 +622,7 @@ export default function ProjectTimelineTab() {
               const arr = draft?.results ?? [];
               const i = arr.findIndex((t) => t.id === tid);
               if (i !== -1) arr[i] = { ...arr[i], ...patch };
-            })
+            }),
           );
 
           updateTask({ id: tid, patch })
@@ -815,7 +815,7 @@ export default function ProjectTimelineTab() {
       tl.setWindow(
         new Date(s.getTime() - padMs),
         new Date(e.getTime() + padMs),
-        { animation: false }
+        { animation: false },
       );
     } else if (hasTasks) {
       tl.fit({ animation: false });
@@ -845,7 +845,7 @@ export default function ProjectTimelineTab() {
     tl.setWindow(
       new Date(range.start.getTime() - delta),
       new Date(range.end.getTime() + delta),
-      { animation: false }
+      { animation: false },
     );
   }
 
@@ -871,7 +871,7 @@ export default function ProjectTimelineTab() {
       tl.setWindow(
         new Date(s.getTime() - padMs),
         new Date(e.getTime() + padMs),
-        { animation: false }
+        { animation: false },
       );
     } else {
       tl.fit({ animation: false });
@@ -1163,7 +1163,7 @@ export default function ProjectTimelineTab() {
                       <div className="tls-meta">
                         <span
                           className={`tls-pill tls-pill-prio ${priorityClassFromNumber(
-                            t.priority
+                            t.priority,
                           )}`}
                         >
                           {priorityLabelPl(prioLabel)}
@@ -1211,7 +1211,7 @@ export default function ProjectTimelineTab() {
                 const arr = draft?.results ?? [];
                 const idx = arr.findIndex((t) => t.id === id);
                 if (idx !== -1) arr[idx] = { ...arr[idx], ...patch };
-              })
+              }),
             );
             try {
               await updateTask({ id, patch }).unwrap();
@@ -1248,8 +1248,8 @@ export default function ProjectTimelineTab() {
                     if (!arr.find((t) => t.id === created.id)) {
                       draft.results = [created, ...arr];
                     }
-                  }
-                )
+                  },
+                ),
               );
 
               setCreating({ open: false });
@@ -1258,7 +1258,7 @@ export default function ProjectTimelineTab() {
                 setNewTaskId(created.id);
                 window.setTimeout(() => {
                   setNewTaskId((current) =>
-                    current === created.id ? null : current
+                    current === created.id ? null : current,
                   );
                 }, 20000);
               }

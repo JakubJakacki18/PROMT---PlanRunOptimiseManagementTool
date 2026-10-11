@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
     "jsx": "react-jsx",
-    "types": ["vite/client"],
+    "types": ["vite/client", "vitest/globals"],
     "module": "ESNext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "Bundler",
     "verbatimModuleSyntax": false,
     "skipLibCheck": true
   },
-  "include": ["src"]
+  "include": ["src", "tests", "src/vitest.d.ts"]
 }

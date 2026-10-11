@@ -1,5 +1,11 @@
-from django.db import models
 from django.conf import settings
+from django.core.validators import RegexValidator
+from django.db import models
+
+phone_validator = RegexValidator(
+    regex=r"^\+?\d{7,15}$",
+    message="Phone number must contain 7 to 15 digits and may start with '+'.",
+)
 
 
 class UserRole(models.TextChoices):
@@ -10,15 +16,12 @@ class UserRole(models.TextChoices):
 
 
 class UserProfile(models.Model):
-    """
-    Stores additional information and business logic related to users, such as their role within a project, contact phone number, and an optional avatar image URL.
-    """
-
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="profile",
     )
+
     role = models.CharField(
         max_length=20,
         choices=UserRole.choices,
@@ -26,15 +29,32 @@ class UserProfile(models.Model):
     )
 
     phone = models.CharField(
-        max_length=20,
+        max_length=16,
         blank=True,
-        help_text="Phone number - optional",
+        validators=[phone_validator],
+        help_text="Optional phone number in international format.",
     )
 
     avatar_url = models.URLField(
         blank=True,
         help_text="URL to the user's avatar image - optional",
     )
+
+    def clean_fields(self, exclude=None):
+        if self.phone:
+            self.phone = self.phone.strip()
+            for ch in [" ", "-", "(", ")"]:
+                self.phone = self.phone.replace(ch, "")
+        super().clean_fields(exclude=exclude)
+
+    def clean(self):
+        super().clean()
+        if self.avatar_url:
+            self.avatar_url = self.avatar_url.strip()
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.user.username} ({self.get_role_display()})"

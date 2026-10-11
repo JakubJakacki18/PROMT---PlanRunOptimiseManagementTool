@@ -6,7 +6,7 @@
   display: grid;
   place-items: center;
   z-index: 50;
-  padding: 20px; 
+  padding: 20px;
 }
 
 .modal-window {
@@ -19,7 +19,7 @@
   box-shadow:
     0 10px 15px -3px rgba(0, 0, 0, 0.1),
     0 4px 6px -4px rgba(0, 0, 0, 0.1);
-  overflow: hidden; 
+  overflow: hidden;
 }
 
 @media (max-width: 640px) {
@@ -35,8 +35,8 @@
 .modal-footer {
   display: flex;
   align-items: center;
-  gap: 14px;                 
-  padding: 16px 20px;        
+  gap: 14px;
+  padding: 16px 20px;
   background: #ffffff;
 }
 
@@ -68,7 +68,7 @@
   background: transparent;
   font-size: 1.5rem;
   line-height: 1;
-  padding: 6px 10px;        
+  padding: 6px 10px;
   cursor: pointer;
   color: #4b5563;
 }
@@ -76,10 +76,10 @@
   color: #111827;
 }
 .modal-body {
-  overflow-y: auto;         
-  padding: 22px;             
+  overflow-y: auto;
+  padding: 22px;
   display: grid;
-  gap: 16px;                
+  gap: 16px;
 }
 
 .modal-form {
@@ -88,7 +88,7 @@
 
 .form-grid {
   display: grid;
-  gap: 14px;                 
+  gap: 14px;
 }
 @media (min-width: 640px) {
   .form-grid {
@@ -98,7 +98,7 @@
 
 .form-label {
   display: block;
-  font-size: 0.9rem;        
+  font-size: 0.9rem;
   color: #374151;
   margin-bottom: 6px;
 }
@@ -108,9 +108,9 @@
 .form-select {
   width: 100%;
   border: 1px solid #e5e7eb;
-  border-radius: 10px;       
-  padding: 12px;             
-  font-size: 0.97rem;        
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 0.97rem;
   outline: none;
   background: #fff;
 }
@@ -121,11 +121,10 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
-
 .scope-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px 18px;            
+  gap: 12px 18px;
 }
 .scope-item {
   display: inline-flex;
@@ -139,7 +138,7 @@
   color: white;
   border: none;
   border-radius: 10px;
-  padding: 12px 16px;        
+  padding: 12px 16px;
   font-weight: 600;
   cursor: pointer;
 }

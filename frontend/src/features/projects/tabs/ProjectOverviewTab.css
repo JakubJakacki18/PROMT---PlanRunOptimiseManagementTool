@@ -416,7 +416,10 @@
   cursor: pointer;
   color: #64748b;
   font-weight: 650;
-  transition: 0.15s background, 0.15s color, 0.15s border-color;
+  transition:
+    0.15s background,
+    0.15s color,
+    0.15s border-color;
   white-space: nowrap;
 }
 

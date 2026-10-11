@@ -9,15 +9,15 @@
   --primary: #4f46e5;
   --danger: #dc2626;
   --radius: 14px;
-  --shadow: 0 1px 3px rgba(0,0,0,.06);
-  --shadow2: 0 18px 30px rgba(0,0,0,.14);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow2: 0 18px 30px rgba(0, 0, 0, 0.14);
 }
 
 /* overlay */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15,23,42,.45);
+  background: rgba(15, 23, 42, 0.45);
   backdrop-filter: blur(2px);
   display: flex;
   justify-content: center;
@@ -55,7 +55,7 @@
 }
 
 .modal-subtitle {
-  font-size: .85rem;
+  font-size: 0.85rem;
   color: var(--muted);
 }
 
@@ -70,7 +70,8 @@
 }
 
 /* cards */
-.card, .accordion {
+.card,
+.accordion {
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -85,7 +86,7 @@
 
 /* labels */
 .form-label {
-  font-size: .8rem;
+  font-size: 0.8rem;
   color: var(--muted);
   margin-bottom: 6px;
   font-weight: 650;
@@ -100,7 +101,7 @@
   border-radius: 12px;
   background: #fff;
   color: var(--ink);
-  font-size: .92rem;
+  font-size: 0.92rem;
 }
 
 /* input + select */
@@ -134,17 +135,21 @@
 /* grids */
 .grid-4 {
   display: grid;
-  grid-template-columns: repeat(4,1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 10px;
   align-items: end;
 }
 
-@media(max-width:560px){
-  .grid-4 { grid-template-columns:1fr; }
+@media (max-width: 560px) {
+  .grid-4 {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* accordion */
-.accordion { overflow: hidden; }
+.accordion {
+  overflow: hidden;
+}
 
 .acc-trigger {
   width: 100%;
@@ -188,15 +193,14 @@
 
 /* errors */
 .input-invalid {
-  border-color: rgba(220,38,38,.6);
+  border-color: rgba(220, 38, 38, 0.6);
   background: #fef2f2;
 }
 .error-text {
   color: var(--danger);
-  font-size: .82rem;
+  font-size: 0.82rem;
   margin-top: 4px;
 }
-
 
 .modal-overlay .modal-window input.form-input,
 .modal-overlay .modal-window select.form-select {
@@ -204,7 +208,7 @@
   padding-top: 0 !important;
   padding-bottom: 0 !important;
   padding-left: 12px !important;
-  padding-right: 34px !important; 
+  padding-right: 34px !important;
   line-height: 40px !important;
   color: var(--ink) !important;
   background: #fff !important;

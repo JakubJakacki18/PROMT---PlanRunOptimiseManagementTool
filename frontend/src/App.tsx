@@ -14,6 +14,7 @@ import ProjectKanbanTab from "./features/projects/tabs/ProjectKanbanTab";
 import ProjectTimelineTab from "./features/projects/tabs/ProjectTimelineTab";
 import "vis-timeline/styles/vis-timeline-graph2d.css";
 import ProjectTeamTab from "./features/projects/tabs/ProjectTeamTab";
+import AdminPanel from "./features/admin/AdminPanel";
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="projects" element={<ProjectsPage />} />
           <Route path="fundings" element={<FundingsPage />} />
           <Route path="tasks" element={<TasksPage />} />
+          <Route path="admin" element={<AdminPanel />} />
 
           <Route path="projects/:id" element={<ProjectDetailLayout />}>
             <Route index element={<ProjectOverviewTab />} />

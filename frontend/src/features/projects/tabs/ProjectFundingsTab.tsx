@@ -340,7 +340,7 @@ export default function ProjectFundingsTab() {
         // noop
       }
       return "coverage";
-    }
+    },
   );
 
   useEffect(() => {
@@ -360,7 +360,7 @@ export default function ProjectFundingsTab() {
       project: project.id,
       ordering: "name" as const,
     }),
-    [project.id]
+    [project.id],
   );
 
   const {
@@ -372,7 +372,7 @@ export default function ProjectFundingsTab() {
 
   const linkedFundings: Funding[] = useMemo(
     () => fundingsPage?.results ?? [],
-    [fundingsPage]
+    [fundingsPage],
   );
 
   const hasFundings = linkedFundings.length > 0;
@@ -388,7 +388,7 @@ export default function ProjectFundingsTab() {
         ?.results ??
       (projectFundingsPage as ProjectFundingLink[] | undefined) ??
       [],
-    [projectFundingsPage]
+    [projectFundingsPage],
   );
 
   const pfByFundingId = useMemo(() => {
@@ -559,7 +559,7 @@ export default function ProjectFundingsTab() {
           name: f.name,
           reportingDeadline: f.reporting_deadline as string,
           date: parseDate(f.reporting_deadline)!,
-        })
+        }),
       )
       .filter((x) => x.date && startOfDay(x.date) >= today)
       .sort((a, b) => a.date.getTime() - b.date.getTime())
@@ -572,7 +572,7 @@ export default function ProjectFundingsTab() {
     ];
 
     const amountByStatusArr = rawAmountByStatus.filter(
-      (item) => item.value > 0
+      (item) => item.value > 0,
     );
 
     const largestSharePct =
@@ -615,15 +615,15 @@ export default function ProjectFundingsTab() {
         project: project.id,
         funding_scoped: "1",
         ordering: "-created_at" as const,
-      } as TasksListParams),
-    [project.id]
+      }) as TasksListParams,
+    [project.id],
   );
 
   const { data: fundingTasksPage } = useListTasksQuery(fundingTasksArg);
 
   const fundingScopedTasks: Task[] = useMemo(
     () => fundingTasksPage?.results ?? [],
-    [fundingTasksPage]
+    [fundingTasksPage],
   );
 
   const { totalFundingTasks, fundingCompletionPct, perFundingCompletion } =
@@ -662,7 +662,7 @@ export default function ProjectFundingsTab() {
           acc.done += s.done;
           return acc;
         },
-        { total: 0, done: 0 }
+        { total: 0, done: 0 },
       );
 
       const pct =
@@ -682,22 +682,22 @@ export default function ProjectFundingsTab() {
       ({
         project: project.id,
         ordering: "-created_at" as const,
-      } as TasksListParams),
-    [project.id]
+      }) as TasksListParams,
+    [project.id],
   );
 
   const { data: projectTasksPage } = useListTasksQuery(projectTasksArg);
 
   const projectTasks: Task[] = useMemo(
     () => projectTasksPage?.results ?? [],
-    [projectTasksPage]
+    [projectTasksPage],
   );
 
   const { taskCostTotal, coverageStatus, coveragePct, coveragePieData } =
     useMemo(() => {
       const totalTaskCost = projectTasks.reduce(
         (acc, t) => acc + getTaskBudget(t),
-        0
+        0,
       );
 
       let status: CoverageStatus = "nodata";
@@ -835,7 +835,7 @@ export default function ProjectFundingsTab() {
         atRiskCount: atRisk,
         atRiskIds: atRiskIdsAcc,
         endingSoonItems: endingSoonAcc.sort(
-          (a, b) => a.date.getTime() - b.date.getTime()
+          (a, b) => a.date.getTime() - b.date.getTime(),
         ),
         nextReportingDays: nextReport,
       };
@@ -935,8 +935,8 @@ export default function ProjectFundingsTab() {
             {atRiskCount > 0
               ? `${atRiskCount} ${PL.atRisk.toLowerCase()}`
               : totalFundingTasks === 0
-              ? PL.noTasks
-              : PL.healthy}
+                ? PL.noTasks
+                : PL.healthy}
           </div>
           <div className="pft-kpi-meta">
             {totalFundingTasks === 0
@@ -955,7 +955,7 @@ export default function ProjectFundingsTab() {
               value={selectedFundingId}
               onChange={(e) =>
                 setSelectedFundingId(
-                  e.target.value === "" ? "" : Number(e.target.value)
+                  e.target.value === "" ? "" : Number(e.target.value),
                 )
               }
             >
@@ -1327,7 +1327,7 @@ export default function ProjectFundingsTab() {
                             width: `${clamp(
                               largestFundingSharePct ?? 0,
                               0,
-                              100
+                              100,
                             )}%`,
                           }}
                         />
@@ -1473,7 +1473,7 @@ function FundingAccordionRow({
             ordering: "-created_at" as const,
           } as TasksListParams)
         : undefined,
-    [open, projectFundingId]
+    [open, projectFundingId],
   );
 
   const {
@@ -1498,19 +1498,19 @@ function FundingAccordionRow({
     status === "active"
       ? PL.active
       : status === "upcoming"
-      ? PL.upcoming
-      : status === "finished"
-      ? PL.finished
-      : PL.noDates;
+        ? PL.upcoming
+        : status === "finished"
+          ? PL.finished
+          : PL.noDates;
 
   const statusClass =
     status === "active"
       ? "pft-status-chip-active"
       : status === "upcoming"
-      ? "pft-status-chip-upcoming"
-      : status === "finished"
-      ? "pft-status-chip-finished"
-      : "pft-status-chip-nodates";
+        ? "pft-status-chip-upcoming"
+        : status === "finished"
+          ? "pft-status-chip-finished"
+          : "pft-status-chip-nodates";
 
   const endDate = parseDate(funding.end_date);
   const reportDate = parseDate(funding.reporting_deadline);
@@ -1528,19 +1528,19 @@ function FundingAccordionRow({
     total === 0
       ? PL.noTasks
       : allDone
-      ? PL.healthy
-      : isAtRisk
-      ? PL.atRisk
-      : PL.watch;
+        ? PL.healthy
+        : isAtRisk
+          ? PL.atRisk
+          : PL.watch;
 
   const healthClass =
     total === 0
       ? "pft-health-chip-muted"
       : isAtRisk
-      ? "pft-health-chip-bad"
-      : allDone
-      ? "pft-health-chip-good"
-      : "pft-health-chip-warn";
+        ? "pft-health-chip-bad"
+        : allDone
+          ? "pft-health-chip-good"
+          : "pft-health-chip-warn";
 
   return (
     <li className="pft-funding-row">
@@ -1603,8 +1603,8 @@ function FundingAccordionRow({
               {total === 0
                 ? PL.noTasksYet
                 : allDone
-                ? PL.allTasksDone
-                : PL.doneOf(done, total)}
+                  ? PL.allTasksDone
+                  : PL.doneOf(done, total)}
             </span>
           </div>
 

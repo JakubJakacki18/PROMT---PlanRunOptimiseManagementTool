@@ -34,13 +34,16 @@
   flex-direction: column;
   gap: 4px;
   cursor: pointer;
-  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease,
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    background 0.12s ease,
     border-color 0.12s ease;
 }
 
 .tsk-kpi-tile:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.10);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.1);
   background: #f3f4f6;
   border-color: #d1d5db;
 }
@@ -79,7 +82,7 @@
 }
 
 .tsk-kpi-meta {
-  font-size: 0.80rem;
+  font-size: 0.8rem;
   color: #6b7280;
   line-height: 1.25;
 }
@@ -182,12 +185,15 @@
   border: 1px solid #e5e7eb;
   background: #f9fafb;
   padding: 10px 12px;
-  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    border-color 0.12s ease;
 }
 
 .tsk-item-card:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.10);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.1);
   border-color: #d1d5db;
   background: #f3f4f6;
 }
@@ -207,7 +213,7 @@
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap; 
+  white-space: nowrap;
 }
 
 .tsk-item-chips {
@@ -494,7 +500,7 @@
 }
 
 .tsk-chart-inner--bigger {
-  height: 170px; 
+  height: 170px;
 }
 
 .tsk-chart-values {

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"c:\\\\Users\\\\xBrav\\\\Documents\\\\AAA_Inż_Testowanie\\\\PROMT---PlanRunOptimiseManagementTool\" show 6376b6a:frontend/Dockerfile.playwright)",
+      "Bash(git -C \"c:\\\\Users\\\\xBrav\\\\Documents\\\\AAA_Inż_Testowanie\\\\PROMT---PlanRunOptimiseManagementTool\" show 6376b6a:frontend/e2e/helpers/auth.ts)"
+    ]
+  }
+}

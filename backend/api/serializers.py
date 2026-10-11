@@ -398,3 +398,105 @@ class TaskAssignmentSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             validated_data["assigned_by"] = request.user
         return super().create(validated_data)
+
+
+# ---------- ADMIN USER MANAGEMENT ----------
+
+
+class AdminUserCreateSerializer(serializers.Serializer):
+    """
+    Tworzy nowego User + UserProfile w jednej transakcji.
+    """
+    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField(required=False, allow_blank=True, default="")
+    first_name = serializers.CharField(max_length=150, required=False, allow_blank=True, default="")
+    last_name = serializers.CharField(max_length=150, required=False, allow_blank=True, default="")
+    password = serializers.CharField(write_only=True, min_length=6)
+    role = serializers.ChoiceField(
+        choices=[("admin", "Admin"), ("pm", "PM"), ("member", "Member"), ("viewer", "Viewer")],
+        default="member",
+    )
+    phone = serializers.CharField(max_length=16, required=False, allow_blank=True, default="")
+    avatar_url = serializers.URLField(required=False, allow_blank=True, default="")
+
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("Użytkownik o tej nazwie już istnieje.")
+        return value
+
+    def create(self, validated_data):
+        role = validated_data.pop("role", "member")
+        phone = validated_data.pop("phone", "")
+        avatar_url = validated_data.pop("avatar_url", "")
+        password = validated_data.pop("password")
+
+        with transaction.atomic():
+            user = User.objects.create_user(
+                username=validated_data["username"],
+                email=validated_data.get("email", ""),
+                first_name=validated_data.get("first_name", ""),
+                last_name=validated_data.get("last_name", ""),
+                password=password,
+            )
+            # Profile is auto-created by signal or we update it
+            profile, _ = UserProfile.objects.get_or_create(user=user)
+            profile.role = role
+            profile.phone = phone
+            profile.avatar_url = avatar_url
+            profile.save()
+
+        return user
+
+    def to_representation(self, instance):
+        return UserSerializer(instance, context=self.context).data
+
+
+class AdminUserUpdateSerializer(serializers.Serializer):
+    """
+    Aktualizuje User + UserProfile.
+    """
+    username = serializers.CharField(max_length=150, required=False)
+    email = serializers.EmailField(required=False, allow_blank=True)
+    first_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    last_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    password = serializers.CharField(write_only=True, min_length=6, required=False)
+    role = serializers.ChoiceField(
+        choices=[("admin", "Admin"), ("pm", "PM"), ("member", "Member"), ("viewer", "Viewer")],
+        required=False,
+    )
+    phone = serializers.CharField(max_length=16, required=False, allow_blank=True)
+    avatar_url = serializers.URLField(required=False, allow_blank=True)
+
+    def validate_username(self, value):
+        user = self.instance
+        if User.objects.filter(username=value).exclude(pk=user.pk).exists():
+            raise serializers.ValidationError("Użytkownik o tej nazwie już istnieje.")
+        return value
+
+    def update(self, instance, validated_data):
+        role = validated_data.pop("role", None)
+        phone = validated_data.pop("phone", None)
+        avatar_url = validated_data.pop("avatar_url", None)
+        password = validated_data.pop("password", None)
+
+        with transaction.atomic():
+            for field in ("username", "email", "first_name", "last_name"):
+                if field in validated_data:
+                    setattr(instance, field, validated_data[field])
+            if password:
+                instance.set_password(password)
+            instance.save()
+
+            profile, _ = UserProfile.objects.get_or_create(user=instance)
+            if role is not None:
+                profile.role = role
+            if phone is not None:
+                profile.phone = phone
+            if avatar_url is not None:
+                profile.avatar_url = avatar_url
+            profile.save()
+
+        return instance
+
+    def to_representation(self, instance):
+        return UserSerializer(instance, context=self.context).data

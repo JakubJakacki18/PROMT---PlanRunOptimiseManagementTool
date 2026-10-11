@@ -63,7 +63,7 @@ backend/*.sql
 backend/media/
 
 # Environment files 
-backend/.env
+.env
 backend/.env.local
 backend/.env.*.local
 
