@@ -1,9 +1,12 @@
-class Comment(GenericRelationMixin):
-    __tablename__ = 'comments'
+from django.db import models
 
-    id = models.AutoField(primary_key=True)
+from api.models.mixins.generic_relation_mixin import GenericRelationMixin
+from django.conf import settings
+
+
+class Comment(GenericRelationMixin):
     author = models.ForeignKey(
-        "api.User",
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="comments",
     )
@@ -22,3 +25,6 @@ class Comment(GenericRelationMixin):
 
     def __str__(self):
         return f"Comment by {self.author} on {self.content}"
+
+    class Meta:
+        db_table = "comments"

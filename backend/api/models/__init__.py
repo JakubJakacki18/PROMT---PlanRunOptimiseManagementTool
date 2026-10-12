@@ -14,4 +14,7 @@ __all__ = [
     "TaskScope",
     "UserProfile",
     "TaskAssignment",
+    "Attachment",
+    "Comment",
+    "Expense"
 ]
