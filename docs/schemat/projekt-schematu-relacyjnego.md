@@ -48,7 +48,7 @@ Schemat obejmuje 22 relacji. Implementacja: `promt-schemat.sql` (przetestowana n
 - **ATTACHMENT**(<u>id</u>, #task_id, #comment_id, #expense_id, #uploaded_by_id, file, original_name, mime_type, size_bytes, created_at)
 - **EXPENSE**(<u>id</u>, #project_id, #project_funding_id, #task_id, type, amount, currency, spent_on, document_number, description, #created_by_id, created_at)
 - **ACTIVITY_LOG**(<u>id</u>, #organization_id, #actor_id, entity_type, entity_id, action, changes, created_at)
-- **NOTIFICATION**(<u>id</u>, #activity_id, #recipient_id, read_at)
+- **NOTIFICATION**(<u>id</u>, #activity_id, #recipient_id, content, read_at)
 
 ## 3. Związki między relacjami
 
@@ -985,15 +985,16 @@ Historia zdarzeń: kto, co, na czym. Każda zmiana zadania (np. nowy status) zap
 
 ### 22. notification
 
-Skrzynka osoby: jedno zdarzenie z historii → po jednym wierszu dla każdego odbiorcy (osoby przypisane do zadania albo członkowie grupy zadania). Wiersz na osobę jest potrzebny, bo każdy czyta osobno (read_at).
+Skrzynka osoby: jedno zdarzenie z historii → po jednym wierszu dla każdego odbiorcy (osoby przypisane do zadania albo członkowie grupy zadania). Wiersz na osobę jest potrzebny, bo każdy czyta osobno (read_at). content trzyma gotową treść wiadomości (tytuł, tekst, link), żeby skrzynka nie musiała jej składać z logu.
 
-**NOTIFICATION**(<u>id</u>, #activity_id, #recipient_id, read_at)
+**NOTIFICATION**(<u>id</u>, #activity_id, #recipient_id, content, read_at)
 
 | Atrybut | Typ | Dziedzina | NULL | Klucz | Opis |
 |---|---|---|---|---|---|
 | id | `bigint` | liczba całkowita 64-bit (identyfikator) | nie | PK |  |
 | activity_id | `bigint` | liczba całkowita 64-bit (identyfikator) | nie | FK → activity_log |  |
 | recipient_id | `bigint` | liczba całkowita 64-bit (identyfikator) | nie | FK → organization_member |  |
+| content | `jsonb` | dokument JSON (binarny) | nie |  | treść: tytuł, tekst, link |
 | read_at | `timestamptz` | data i czas ze strefą | tak |  |  |
 
 **Klucze obce**
@@ -1009,10 +1010,10 @@ Skrzynka osoby: jedno zdarzenie z historii → po jednym wierszu dla każdego od
 
 **Zależności funkcyjne**
 
-- {id} → {activity_id, recipient_id, read_at}
+- {id} → {activity_id, recipient_id, content, read_at}
 - {activity_id, recipient_id} → {id}  (klucz kandydujący)
 
-**Postać normalna:** BCNF – jedynym wyznacznikiem są klucze (kandydujące).
+**Postać normalna:** BCNF – jedynym wyznacznikiem są klucze (kandydujące). Kolumny content to typy złożone PostgreSQL (tablica / jsonb) – świadome elementy obiektowo-relacyjne; w wariancie czysto relacyjnym byłyby osobną relacją.
 
 **Indeksy**
 

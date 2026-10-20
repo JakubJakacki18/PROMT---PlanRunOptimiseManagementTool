@@ -276,8 +276,9 @@ Table "notification" {
   "id" bigint [pk, not null]
   "activity_id" bigint [not null]
   "recipient_id" bigint [not null]
+  "content" jsonb [not null, note: 'treść: tytuł, tekst, link']
   "read_at" timestamptz [null]
-  Note: 'Skrzynka osoby: jedno zdarzenie z historii → po jednym wierszu dla każdego odbiorcy (osoby przypisane do zadania albo członkowie grupy zadania). Wiersz na osobę jest potrzebny, bo każdy czyta osobno (read_at).'
+  Note: 'Skrzynka osoby: jedno zdarzenie z historii → po jednym wierszu dla każdego odbiorcy (osoby przypisane do zadania albo członkowie grupy zadania). Wiersz na osobę jest potrzebny, bo każdy czyta osobno (read_at). content trzyma gotową treść wiadomości (tytuł, tekst, link), żeby skrzynka nie musiała jej składać z logu.'
 }
 
 Ref: "organization_member"."organization_id" > "organization"."id"

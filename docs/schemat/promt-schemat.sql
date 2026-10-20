@@ -334,6 +334,7 @@ CREATE TABLE notification (
     id            bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     activity_id   bigint      NOT NULL REFERENCES activity_log ON DELETE CASCADE,
     recipient_id  bigint      NOT NULL REFERENCES organization_member ON DELETE CASCADE,
+    content       jsonb       NOT NULL DEFAULT '{}',        -- treść: {"title", "body", "link"}
     read_at       timestamptz,
     UNIQUE (activity_id, recipient_id)
 );
