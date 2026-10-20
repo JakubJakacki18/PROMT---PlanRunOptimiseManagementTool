@@ -1,0 +1,335 @@
+Project PROMT {
+  database_type: "PostgreSQL"
+  Note: "Schemat bazy PROMT – 22 tabele"
+}
+
+Table "user" {
+  "id" bigint [pk, not null]
+  "email" varchar [unique, not null, note: 'login']
+  "password" varchar [not null]
+  "first_name" varchar [not null]
+  "last_name" varchar [not null]
+  "is_active" bool [not null]
+  "is_staff" bool [not null]
+  "is_superuser" bool [not null, note: 'Admin systemu']
+  "last_login" timestamptz [null]
+  "date_joined" timestamptz [not null]
+  Note: 'Własny model użytkownika Django (AbstractUser) – logowanie e-mailem. Jedno konto na osobę, niezależnie od liczby firm; dane firmowe są w organization_member.'
+}
+
+Table "organization" {
+  "id" bigint [pk, not null]
+  "name" varchar [not null]
+  "tax_id" varchar [unique, null, note: 'NIP']
+  "is_active" bool [not null, note: 'false = zablokowana']
+  "settings" jsonb [not null, note: 'np. nazwy priorytetów']
+  "created_at" timestamptz [not null]
+  Note: 'Firma – wszystko poza kontem użytkownika należy do jakiejś firmy.'
+}
+
+Table "organization_member" {
+  "id" bigint [pk, not null]
+  "organization_id" bigint [not null]
+  "user_id" bigint [not null]
+  "email" varchar [null, note: 'służbowy']
+  "phone" varchar [null]
+  "job_title" varchar [null]
+  "avatar_url" varchar [null]
+  "status" varchar [not null, note: 'invited / active / suspended / left']
+  "joined_at" timestamptz [null]
+  Note: 'Osoba w firmie (zastępuje user_profile). Ta sama osoba w dwóch firmach ma dwa wiersze – z innym e-mailem, telefonem, stanowiskiem i avatarem.'
+}
+
+Table "member_group" {
+  "id" bigint [pk, not null]
+  "organization_id" bigint [null, note: 'grupa firmowa ALBO']
+  "project_id" bigint [null, note: 'grupa projektowa (XOR)']
+  "parent_id" bigint [null, note: 'grupa nadrzędna']
+  "name" varchar [not null, note: 'Księgowość, Frontend…']
+  "description" text [null, note: 'np. „Dział księgowości”']
+  "created_at" timestamptz [not null]
+  Note: 'Grupa ludzi: firmowa (Księgowość, Deweloperzy) ALBO projektowa (Frontend w projekcie X). Grupy tworzą drzewo – podgrupa dziedziczy role grupy nadrzędnej.'
+}
+
+Table "member_group_member" {
+  "group_id" bigint [not null]
+  "member_id" bigint [not null]
+  "added_at" timestamptz [not null]
+  indexes {
+    (group_id, member_id) [pk]
+  }
+  Note: 'Kto należy do grupy (M:N).'
+}
+
+Table "role" {
+  "id" bigint [pk, not null]
+  "organization_id" bigint [null, note: 'null = wbudowana']
+  "name" varchar [not null]
+  "scope" varchar [not null, note: 'organization / project']
+  "permissions" "varchar[]" [not null, note: '[expense.create, …]']
+  Note: 'Rola = nazwany zestaw uprawnień (Księgowa, Młodsza księgowa, Admin projektu…). Jedna definicja używana w wielu miejscach. Wbudowane (organization_id = null) + własne firmy.'
+}
+
+Table "role_assignment" {
+  "id" bigint [pk, not null]
+  "role_id" bigint [not null]
+  "member_id" bigint [null, note: 'osoba ALBO']
+  "group_id" bigint [null, note: 'grupa (XOR)']
+  "project_id" bigint [null, note: 'null = cała firma']
+  "created_at" timestamptz [not null]
+  Note: 'Nadanie roli osobie ALBO grupie, w całej firmie (project_id = null – obowiązuje we wszystkich projektach) albo w jednym projekcie. Uprawnienia osoby = role własne + role jej grup i grup nadrzędnych, z poziomu firmy i projektu.'
+}
+
+Table "task_status" {
+  "id" bigint [pk, not null]
+  "organization_id" bigint [null, note: 'status firmy ALBO']
+  "project_id" bigint [null, note: 'status projektu (XOR)']
+  "category" varchar [not null, note: 'todo / in_progress / done / cancelled']
+  "name" varchar [not null, note: 'In Development, Testing…']
+  "color" varchar [not null]
+  "position" smallint [not null]
+  "is_default" bool [not null]
+  "is_active" bool [not null]
+  Note: 'Statusy zadań firmy albo projektu. category = jedna z 4 stałych wartości (todo / in_progress / done / cancelled), na której opiera się logika i kolumny Kanbana. Wiersze to statusy firmy w kategorii.'
+}
+
+Table "project" {
+  "id" bigint [pk, not null]
+  "organization_id" bigint [not null]
+  "owner_id" bigint [not null, note: 'z bazy']
+  "name" varchar [not null]
+  "description" text [not null]
+  "status" varchar [not null, note: 'z bazy']
+  "start_date" date [null]
+  "end_date" date [null]
+  "hidden_status_ids" "bigint[]" [not null, note: 'wyłączone statusy firmy']
+  "created_at" timestamptz [not null]
+  "updated_at" timestamptz [not null]
+  Note: 'Projekt – z bazy, dostaje firmę. Może dodać własne statusy (task_status.project_id) i wyłączyć statusy firmy.'
+}
+
+Table "milestone" {
+  "id" bigint [pk, not null]
+  "project_id" bigint [not null]
+  "name" varchar [not null]
+  "status" varchar [not null, note: 'planned / active / done']
+  "due_date" date [null]
+  "position" smallint [not null]
+  Note: 'Etap projektu z terminem.'
+}
+
+Table "funding" {
+  "id" bigint [pk, not null]
+  "organization_id" bigint [not null]
+  "type" varchar [not null]
+  "name" varchar [not null]
+  "funder" varchar [not null]
+  "program" varchar [not null]
+  "agreement_number" varchar [not null]
+  "amount_total" "numeric(14,2)" [not null]
+  "currency" "char(3)" [not null]
+  "start_date" date [null]
+  "end_date" date [null]
+  "reporting_deadline" date [null]
+  "description" text [not null]
+  "created_at" timestamptz [not null]
+  Note: 'Finansowanie – z bazy, dostaje firmę (grant należy do firmy i finansuje kilka jej projektów).'
+}
+
+Table "project_funding" {
+  "id" bigint [pk, not null]
+  "project_id" bigint [not null]
+  "funding_id" bigint [not null]
+  "allocation_start" date [null]
+  "allocation_end" date [null]
+  "is_primary" bool [not null]
+  "note" text [not null]
+  "created_at" timestamptz [not null]
+  Note: 'Z bazy, bez zmian: które finansowanie finansuje który projekt i w jakim okresie.'
+}
+
+Table "task_template" {
+  "id" bigint [pk, not null]
+  "funding_id" bigint [not null]
+  "title" varchar [not null]
+  "description" text [not null]
+  "default_status_id" bigint [null]
+  "default_priority" smallint [not null, note: '1..5']
+  "default_est_hours" "numeric(6,2)" [null]
+  "default_due_days" int [null]
+  "mandatory" bool [not null]
+  Note: 'Szablon zadania (w bazie: funding_task) – zadanie wymagane przez finansowanie. Po podpięciu finansowania do projektu (INSERT project_funding) zadania z szablonów tworzą się automatycznie (task z project_funding_id i template_id).'
+}
+
+Table "task" {
+  "id" bigint [pk, not null]
+  "project_id" bigint [null, note: 'zadanie projektu ALBO']
+  "funding_id" bigint [null, note: 'zadanie samego grantu']
+  "project_funding_id" bigint [null, note: 'grant w projekcie']
+  "milestone_id" bigint [null]
+  "parent_id" bigint [null, note: 'podzadanie']
+  "template_id" bigint [null, note: 'z jakiego szablonu']
+  "status_id" bigint [not null, note: 'etykieta, np. „In Development”']
+  "group_id" bigint [null, note: 'zadanie dla grupy']
+  "title" varchar [not null]
+  "description" text [not null]
+  "priority" smallint [not null, note: '1..5']
+  "start_date" date [null]
+  "due_date" date [null]
+  "est_hours" "numeric(6,2)" [null]
+  "created_at" timestamptz [not null]
+  "updated_at" timestamptz [not null]
+  Note: 'Zadanie – z bazy. Kontekst z dawnego task_scope jest w kolumnach zadania (ta sama informacja, bez JOIN-a): projekt ALBO samo finansowanie, opcjonalnie finansowanie projektu. Status to etykieta firmy/projektu – jego kategorię (todo / in progress / done / cancelled) zna sam status.'
+}
+
+Table "task_assignment" {
+  "id" bigint [pk, not null]
+  "task_id" bigint [not null]
+  "member_id" bigint [not null]
+  "assigned_by_id" bigint [null]
+  "assigned_at" timestamptz [not null]
+  "started_at" timestamptz [null]
+  "finished_at" timestamptz [null]
+  Note: 'Z bazy: kto wykonuje zadanie i kiedy zaczął / skończył. Godziny są w time_entry.'
+}
+
+Table "time_entry" {
+  "id" bigint [pk, not null]
+  "assignment_id" bigint [not null]
+  "work_date" date [not null]
+  "hours" "numeric(5,2)" [not null]
+  "started_at" timestamptz [null]
+  "finished_at" timestamptz [null]
+  "note" text [null]
+  "created_at" timestamptz [not null]
+  "updated_at" timestamptz [not null]
+  Note: 'Ewidencja czasu: data, godziny, opcjonalnie dokładny start i koniec. Wpis należy do przypisania osoby do zadania.'
+}
+
+Table "checklist_item" {
+  "id" bigint [pk, not null]
+  "task_id" bigint [not null]
+  "section" varchar [null]
+  "title" varchar [not null]
+  "position" smallint [not null]
+  "assignee_id" bigint [null, note: 'kto ma odhaczyć']
+  "done_by_id" bigint [null]
+  "done_at" timestamptz [null]
+  Note: 'Punkt checklisty w zadaniu; section grupuje punkty, gdy list jest kilka.'
+}
+
+Table "comment" {
+  "id" bigint [pk, not null]
+  "task_id" bigint [null, note: 'zadanie ALBO']
+  "project_id" bigint [null, note: 'projekt (XOR)']
+  "author_id" bigint [not null]
+  "parent_id" bigint [null, note: 'odpowiedź']
+  "content" text [not null]
+  "created_at" timestamptz [not null]
+  "updated_at" timestamptz [not null]
+  Note: 'Komentarz do zadania ALBO projektu (model Kuby, zwykłe FK zamiast relacji generycznej).'
+}
+
+Table "attachment" {
+  "id" bigint [pk, not null]
+  "task_id" bigint [null, note: 'dokładnie jedno']
+  "comment_id" bigint [null, note: 'z tych']
+  "expense_id" bigint [null, note: 'trzech']
+  "uploaded_by_id" bigint [not null]
+  "file" varchar [not null]
+  "original_name" varchar [not null]
+  "mime_type" varchar [not null]
+  "size_bytes" bigint [not null]
+  "created_at" timestamptz [not null]
+  Note: 'Plik zadania, komentarza albo wydatku (faktura) – model Kuby; przejmuje receipt_url z task.'
+}
+
+Table "expense" {
+  "id" bigint [pk, not null]
+  "project_id" bigint [null, note: 'koszt własny ALBO']
+  "project_funding_id" bigint [null, note: 'z finansowania (XOR)']
+  "task_id" bigint [null, note: 'koszt zadania (jak cost_* w bazie)']
+  "type" varchar [not null]
+  "amount" "numeric(14,2)" [not null]
+  "currency" "char(3)" [not null]
+  "spent_on" date [not null]
+  "document_number" varchar [null]
+  "description" text [not null]
+  "created_by_id" bigint [not null]
+  "created_at" timestamptz [not null]
+  Note: 'Wydatek (model Kuby) – przejmuje cost_* z task. Koszt własny projektu ALBO rozliczany z finansowania (project_funding już wskazuje projekt, więc nie powtarzamy project_id).'
+}
+
+Table "activity_log" {
+  "id" bigint [pk, not null]
+  "organization_id" bigint [not null]
+  "actor_id" bigint [null]
+  "entity_type" varchar [not null, note: 'task / project …']
+  "entity_id" bigint [not null]
+  "action" varchar [not null, note: 'status_changed …']
+  "changes" jsonb [not null]
+  "created_at" timestamptz [not null]
+  Note: 'Historia zdarzeń: kto, co, na czym. Każda zmiana zadania (np. nowy status) zapisuje tu wiersz.'
+}
+
+Table "notification" {
+  "id" bigint [pk, not null]
+  "activity_id" bigint [not null]
+  "recipient_id" bigint [not null]
+  "read_at" timestamptz [null]
+  Note: 'Skrzynka osoby: jedno zdarzenie z historii → po jednym wierszu dla każdego odbiorcy (osoby przypisane do zadania albo członkowie grupy zadania). Wiersz na osobę jest potrzebny, bo każdy czyta osobno (read_at).'
+}
+
+Ref: "organization_member"."organization_id" > "organization"."id"
+Ref: "organization_member"."user_id" > "user"."id"
+Ref: "member_group"."organization_id" > "organization"."id"
+Ref: "member_group"."project_id" > "project"."id"
+Ref: "member_group"."parent_id" > "member_group"."id"
+Ref: "member_group_member"."group_id" > "member_group"."id"
+Ref: "member_group_member"."member_id" > "organization_member"."id"
+Ref: "role"."organization_id" > "organization"."id"
+Ref: "role_assignment"."role_id" > "role"."id"
+Ref: "role_assignment"."member_id" > "organization_member"."id"
+Ref: "role_assignment"."group_id" > "member_group"."id"
+Ref: "role_assignment"."project_id" > "project"."id"
+Ref: "task_status"."organization_id" > "organization"."id"
+Ref: "task_status"."project_id" > "project"."id"
+Ref: "project"."organization_id" > "organization"."id"
+Ref: "project"."owner_id" > "organization_member"."id"
+Ref: "milestone"."project_id" > "project"."id"
+Ref: "funding"."organization_id" > "organization"."id"
+Ref: "project_funding"."project_id" > "project"."id"
+Ref: "project_funding"."funding_id" > "funding"."id"
+Ref: "task_template"."funding_id" > "funding"."id"
+Ref: "task_template"."default_status_id" > "task_status"."id"
+Ref: "task"."project_id" > "project"."id"
+Ref: "task"."funding_id" > "funding"."id"
+Ref: "task"."project_funding_id" > "project_funding"."id"
+Ref: "task"."milestone_id" > "milestone"."id"
+Ref: "task"."parent_id" > "task"."id"
+Ref: "task"."template_id" > "task_template"."id"
+Ref: "task"."status_id" > "task_status"."id"
+Ref: "task"."group_id" > "member_group"."id"
+Ref: "task_assignment"."task_id" > "task"."id"
+Ref: "task_assignment"."member_id" > "organization_member"."id"
+Ref: "task_assignment"."assigned_by_id" > "organization_member"."id"
+Ref: "time_entry"."assignment_id" > "task_assignment"."id"
+Ref: "checklist_item"."task_id" > "task"."id"
+Ref: "checklist_item"."assignee_id" > "organization_member"."id"
+Ref: "checklist_item"."done_by_id" > "organization_member"."id"
+Ref: "comment"."task_id" > "task"."id"
+Ref: "comment"."project_id" > "project"."id"
+Ref: "comment"."author_id" > "organization_member"."id"
+Ref: "comment"."parent_id" > "comment"."id"
+Ref: "attachment"."task_id" > "task"."id"
+Ref: "attachment"."comment_id" > "comment"."id"
+Ref: "attachment"."expense_id" > "expense"."id"
+Ref: "attachment"."uploaded_by_id" > "organization_member"."id"
+Ref: "expense"."project_id" > "project"."id"
+Ref: "expense"."project_funding_id" > "project_funding"."id"
+Ref: "expense"."task_id" > "task"."id"
+Ref: "expense"."created_by_id" > "organization_member"."id"
+Ref: "activity_log"."organization_id" > "organization"."id"
+Ref: "activity_log"."actor_id" > "organization_member"."id"
+Ref: "notification"."activity_id" > "activity_log"."id"
+Ref: "notification"."recipient_id" > "organization_member"."id"
