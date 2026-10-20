@@ -13,6 +13,8 @@ Podgląd online z opisem każdej tabeli: https://claude.ai/artifact/JwLRGQuSZawj
 | `promt-schemat.drawio` | diagram UML (ciemny motyw) | VS Code + rozszerzenie **Draw.io Integration** (`hediet.vscode-drawio`) albo https://app.diagrams.net |
 | `promt-schemat-jasny.drawio` | ten sam diagram, jasny | jw. |
 | `promt-schemat.dbml` | tabele i relacje tekstem | https://dbdiagram.io (wklej treść) |
+| `projekt-schematu-relacyjnego.md` | projekt schematu relacyjnego: relacje, dziedziny, klucze, więzy, zależności funkcyjne, normalizacja | podgląd Markdown (`Ctrl+Shift+V` w VS Code) albo GitHub |
+| `projekt-schematu-relacyjnego.drawio` | diagram schematu relacyjnego (PK podkreślony, `#` = klucz obcy, notacja crow's foot) | jak wyżej |
 | `promt-schemat.sql` | pełny schemat PostgreSQL: tabele, klucze, CHECK, indeksy, widok uprawnień, trigger szablonów | `psql -d <pusta_baza> -f promt-schemat.sql` |
 
 ## Jak edytować diagram
