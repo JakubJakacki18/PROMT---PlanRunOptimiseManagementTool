@@ -2,6 +2,8 @@ from django.db import models
 from django.core.validators import MinValueValidator
 from django.db.models import Q, F
 
+from api.models.status import default_task_status
+
 
 class Funding(models.Model):
     class Type(models.TextChoices):
@@ -9,6 +11,14 @@ class Funding(models.Model):
         SPONSORSHIP = "sponsorship", "Sponsoring"
         DONATION = "donation", "Darowizna"
         INTERNAL = "internal", "Wewnętrzne"
+
+    organization = models.ForeignKey(
+        "api.Organization",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="fundings",
+    )
 
     type = models.CharField(max_length=20, choices=Type.choices, default=Type.INTERNAL)
     name = models.CharField(max_length=200)
@@ -32,6 +42,7 @@ class Funding(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        db_table = "promt_funding"
         constraints = [
             models.CheckConstraint(
                 condition=(
@@ -63,6 +74,7 @@ class ProjectFunding(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        db_table = "promt_project_funding"
         unique_together = ("project", "funding")
         constraints = [
             models.CheckConstraint(
@@ -80,11 +92,6 @@ class ProjectFunding(models.Model):
 
 
 class FundingTask(models.Model):
-    class DefaultStatus(models.TextChoices):
-        TODO = "todo", "To do"
-        DOING = "doing", "Doing"
-        DONE = "done", "Done"
-
     class DefaultPriority(models.IntegerChoices):
         LOW = 1, "Low"
         MEDIUM = 2, "Medium"
@@ -96,8 +103,12 @@ class FundingTask(models.Model):
 
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    default_status = models.CharField(
-        max_length=10, choices=DefaultStatus.choices, default=DefaultStatus.TODO
+    default_status = models.ForeignKey(
+        "api.Status",
+        on_delete=models.PROTECT,
+        blank=True,
+        related_name="funding_task_templates",
+        limit_choices_to={"applies_to": "task"},
     )
     default_priority = models.IntegerField(
         choices=DefaultPriority.choices, default=DefaultPriority.MEDIUM
@@ -109,6 +120,21 @@ class FundingTask(models.Model):
     default_due_days = models.IntegerField(null=True, blank=True)
 
     mandatory = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = "promt_funding_task"
+
+    def clean(self):
+        super().clean()
+        self._fill_default_status()
+
+    def save(self, *args, **kwargs):
+        self._fill_default_status()
+        super().save(*args, **kwargs)
+
+    def _fill_default_status(self):
+        if self.default_status_id is None:
+            self.default_status_id = default_task_status()
 
     def __str__(self):
         return f"[{self.funding.name}] {self.title}"

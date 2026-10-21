@@ -4,7 +4,7 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 
-from api.models import Task
+from api.models import Status, Task
 
 
 @pytest.mark.parametrize(
@@ -83,13 +83,17 @@ def test_create_task_when_invalid_priority_is_given_then_exception_is_raised(pri
         task.save()
 
 
-@pytest.mark.parametrize("status", ["", "test", None])
 @pytest.mark.django_db
-def test_create_task_when_invalid_status_is_given_then_exception_is_raised(status):
-    task = Task(title="Test", status=status)
+def test_create_task_when_no_status_is_given_then_default_todo_is_used():
+    task = Task.objects.create(title="Test")
+    assert task.status.code == "todo"
+
+
+@pytest.mark.django_db
+def test_create_task_when_milestone_status_is_given_then_exception_is_raised():
+    task = Task(title="Test", status=Status.objects.get(applies_to="milestone", code="planned"))
     with pytest.raises(ValidationError):
         task.full_clean()
-        task.save()
 
 
 @pytest.mark.parametrize(

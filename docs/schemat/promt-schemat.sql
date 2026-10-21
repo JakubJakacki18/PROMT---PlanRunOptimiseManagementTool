@@ -101,6 +101,7 @@ CREATE TABLE role_assignment (
     group_id    bigint      REFERENCES member_group ON DELETE CASCADE,         -- grupa
     project_id  bigint      REFERENCES project ON DELETE CASCADE,              -- NULL = cała firma
     created_at  timestamptz NOT NULL DEFAULT now(),
+    updated_at  timestamptz NOT NULL DEFAULT now(),
     CHECK (num_nonnulls(member_id, group_id) = 1),
     UNIQUE NULLS NOT DISTINCT (role_id, member_id, group_id, project_id)
 );
@@ -134,7 +135,9 @@ CREATE TABLE milestone (
     name        varchar(200) NOT NULL,
     status      varchar(12)  NOT NULL DEFAULT 'planned' CHECK (status IN ('planned', 'active', 'done')),
     due_date    date,
-    position    smallint     NOT NULL DEFAULT 0
+    position    smallint     NOT NULL DEFAULT 0,
+    created_at  timestamptz  NOT NULL DEFAULT now(),
+    updated_at  timestamptz  NOT NULL DEFAULT now()          -- ostatnia edycja
 );
 CREATE INDEX milestone_project_ix ON milestone (project_id, position);
 
@@ -249,14 +252,14 @@ CREATE INDEX time_entry_assignment_ix ON time_entry (assignment_id, work_date);
 CREATE TABLE checklist_item (
     id           bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     task_id      bigint       NOT NULL REFERENCES task ON DELETE CASCADE,
-    section      varchar(120),                                -- nazwa listy w zadaniu
-    title        varchar(300) NOT NULL,
+    checklist_title  varchar(120),                            -- tytuł checklisty w zadaniu
+    element          varchar(300) NOT NULL,                   -- treść punktu do odhaczenia
     position     smallint     NOT NULL DEFAULT 0,
     assignee_id  bigint       REFERENCES organization_member ON DELETE SET NULL,
     done_by_id   bigint       REFERENCES organization_member ON DELETE SET NULL,
     done_at      timestamptz
 );
-CREATE INDEX checklist_item_task_ix ON checklist_item (task_id, section, position);
+CREATE INDEX checklist_item_task_ix ON checklist_item (task_id, checklist_title, position);
 CREATE INDEX checklist_item_assignee_ix ON checklist_item (assignee_id);
 CREATE INDEX checklist_item_done_by_ix ON checklist_item (done_by_id);
 

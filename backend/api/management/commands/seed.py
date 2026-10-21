@@ -9,7 +9,13 @@ from django.utils import timezone
 
 from faker import Faker
 
+from api import access
 from api.models import (
+    Organization,
+    OrganizationMember,
+    Role,
+    RoleAssignment,
+    Status,
     UserProfile,
     Funding,
     FundingTask,
@@ -43,6 +49,16 @@ class Command(BaseCommand):
         if options["reset"]:
             self.reset_demo_data()
 
+        self.organization, _ = Organization.objects.get_or_create(
+            slug="default", defaults={"name": "Default organization"}
+        )
+        self.statuses = {
+            s.code: s
+            for s in Status.objects.filter(
+                organization__isnull=True, applies_to=Status.AppliesTo.TASK
+            )
+        }
+
         users = self.seed_users(options["users"])
         fundings = self.seed_fundings(options["fundings"])
         self.seed_funding_templates(
@@ -61,6 +77,7 @@ class Command(BaseCommand):
         self.seed_direct_funding_tasks(fundings)
         self.seed_unbound_tasks(options["unbound_tasks"])
         self.seed_assignments(users, options["max_assignments_per_task"])
+        self.seed_project_roles(projects)
 
         self.stdout.write(self.style.SUCCESS("Seed completed successfully."))
         self.print_summary(project_fundings)
@@ -104,13 +121,21 @@ class Command(BaseCommand):
                 user.set_password("demo1234")
                 user.save()
 
-            UserProfile.objects.get_or_create(
+            UserProfile.objects.update_or_create(
                 user=user,
                 defaults={
-                    "role": roles[i] if i < len(roles) else random.choice(roles[1:]),
                     "phone": f"+48{random.randint(100000000, 999999999)}",
                     "avatar_url": "",
                 },
+            )
+            role = roles[i] if i < len(roles) else random.choice(roles[1:])
+            OrganizationMember.objects.get_or_create(organization=self.organization, user=user)
+            RoleAssignment.objects.get_or_create(
+                role=Role.objects.get(
+                    organization__isnull=True, code=access.LEGACY_ROLE_TO_ORG_ROLE[role]
+                ),
+                user=user,
+                organization=self.organization,
             )
 
             users.append(user)
@@ -137,6 +162,7 @@ class Command(BaseCommand):
             funding, _ = Funding.objects.get_or_create(
                 name=f"{funding_label} {i+1} - {fake.company()}",
                 defaults={
+                    "organization": self.organization,
                     "type": funding_type,
                     "funder": fake.company(),
                     "program": fake.catch_phrase(),
@@ -178,7 +204,7 @@ class Command(BaseCommand):
                     title=title,
                     defaults={
                         "description": fake.text(max_nb_chars=180),
-                        "default_status": random.choice(["todo", "doing", "done"]),
+                        "default_status": self.statuses[random.choice(["todo", "doing", "done"])],
                         "default_priority": random.choice([1, 2, 3]),
                         "default_est_hours": Decimal(str(random.choice([2, 4, 6, 8, 12, 16, 24]))),
                         "default_due_days": random.randint(3, 60),
@@ -220,6 +246,7 @@ class Command(BaseCommand):
                 name=f"Projekt {i+1} - {random.choice(project_types)}",
                 defaults={
                     "description": fake.text(max_nb_chars=260),
+                    "organization": self.organization,
                     "status": random.choices(statuses, weights=[2, 6, 2], k=1)[0],
                     "owner": random.choice(users),
                     "start_date": start_date,
@@ -332,7 +359,7 @@ class Command(BaseCommand):
                 task = Task.objects.create(
                     title=f"{random.choice(task_titles)} #{i+1} / {project.name}",
                     description=fake.text(max_nb_chars=240),
-                    status=status,
+                    status=self.statuses[status],
                     priority=priority,
                     start_date=start_date,
                     due_date=due_date,
@@ -390,7 +417,7 @@ class Command(BaseCommand):
                 task = Task.objects.create(
                     title=f"{random.choice(funding_task_titles)} #{i+1} / {funding.name}",
                     description=fake.text(max_nb_chars=200),
-                    status=status,
+                    status=self.statuses[status],
                     priority=random.choice([1, 2, 3]),
                     start_date=start_date,
                     due_date=due_date,
@@ -441,7 +468,7 @@ class Command(BaseCommand):
             Task.objects.create(
                 title=f"{random.choice(titles)} #{i+1}",
                 description=fake.text(max_nb_chars=180),
-                status=status,
+                status=self.statuses[status],
                 priority=random.choice([1, 2, 3]),
                 start_date=start_date,
                 due_date=due_date,
@@ -453,7 +480,7 @@ class Command(BaseCommand):
             )
 
     def seed_assignments(self, users, max_assignments_per_task):
-        tasks = list(Task.objects.all().order_by("id"))
+        tasks = list(Task.objects.select_related("status").order_by("id"))
         if not tasks or not users:
             return
 
@@ -471,10 +498,10 @@ class Command(BaseCommand):
                 started_at = None
                 finished_at = None
 
-                if task.status in ["doing", "done"]:
+                if task.status.code in ["doing", "done"]:
                     started_at = timezone.now() - timedelta(days=random.randint(1, 30))
 
-                if task.status == "done":
+                if task.status.code == "done":
                     finished_at = started_at + timedelta(days=random.randint(1, 10))
 
                 TaskAssignment.objects.get_or_create(
@@ -488,6 +515,24 @@ class Command(BaseCommand):
                     },
                 )
 
+    def seed_project_roles(self, projects):
+        """Owners administer their projects; people assigned to tasks become project members."""
+        project_admin = Role.objects.get(organization__isnull=True, code="project_admin")
+        project_member = Role.objects.get(organization__isnull=True, code="project_member")
+        for project in projects:
+            if project.owner_id:
+                RoleAssignment.objects.get_or_create(
+                    role=project_admin, user_id=project.owner_id, project=project
+                )
+            user_ids = TaskAssignment.objects.filter(
+                task__scope__project=project
+            ).values_list("user_id", flat=True).distinct()
+            for user_id in user_ids:
+                if user_id != project.owner_id:
+                    RoleAssignment.objects.get_or_create(
+                        role=project_member, user_id=user_id, project=project
+                    )
+
     def print_summary(self, project_fundings):
         self.stdout.write("")
         self.stdout.write("=== SUMMARY ===")
@@ -500,5 +545,6 @@ class Command(BaseCommand):
         self.stdout.write(f"Tasks: {Task.objects.count()}")
         self.stdout.write(f"Scopes: {TaskScope.objects.count()}")
         self.stdout.write(f"Assignments: {TaskAssignment.objects.count()}")
+        self.stdout.write(f"Role assignments: {RoleAssignment.objects.count()}")
         self.stdout.write("")
         self.stdout.write("Demo login: test_1 / test1234")

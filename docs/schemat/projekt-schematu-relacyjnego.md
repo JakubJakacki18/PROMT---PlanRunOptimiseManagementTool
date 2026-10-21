@@ -21,7 +21,7 @@ Schemat obejmuje 22 relacji. Implementacja: `promt-schemat.sql` (przetestowana n
 - **MEMBER_GROUP**(<u>id</u>, #organization_id, #project_id, #parent_id, name, description, created_at)
 - **MEMBER_GROUP_MEMBER**(<u>#group_id</u>, <u>#member_id</u>, added_at)
 - **ROLE**(<u>id</u>, #organization_id, name, scope, permissions)
-- **ROLE_ASSIGNMENT**(<u>id</u>, #role_id, #member_id, #group_id, #project_id, created_at)
+- **ROLE_ASSIGNMENT**(<u>id</u>, #role_id, #member_id, #group_id, #project_id, created_at, updated_at)
 
 **Statusy zadań**
 
@@ -30,7 +30,7 @@ Schemat obejmuje 22 relacji. Implementacja: `promt-schemat.sql` (przetestowana n
 **Projekty i finansowanie**
 
 - **PROJECT**(<u>id</u>, #organization_id, #owner_id, name, description, status, start_date, end_date, hidden_status_ids, created_at, updated_at)
-- **MILESTONE**(<u>id</u>, #project_id, name, status, due_date, position)
+- **MILESTONE**(<u>id</u>, #project_id, name, status, due_date, position, created_at, updated_at)
 - **FUNDING**(<u>id</u>, #organization_id, type, name, funder, program, agreement_number, amount_total, currency, start_date, end_date, reporting_deadline, description, created_at)
 - **PROJECT_FUNDING**(<u>id</u>, #project_id, #funding_id, allocation_start, allocation_end, is_primary, note, created_at)
 - **TASK_TEMPLATE**(<u>id</u>, #funding_id, title, description, #default_status_id, default_priority, default_est_hours, default_due_days, mandatory)
@@ -40,7 +40,7 @@ Schemat obejmuje 22 relacji. Implementacja: `promt-schemat.sql` (przetestowana n
 - **TASK**(<u>id</u>, #project_id, #funding_id, #project_funding_id, #milestone_id, #parent_id, #template_id, #status_id, #group_id, title, description, priority, start_date, due_date, est_hours, created_at, updated_at)
 - **TASK_ASSIGNMENT**(<u>id</u>, #task_id, #member_id, #assigned_by_id, assigned_at, started_at, finished_at)
 - **TIME_ENTRY**(<u>id</u>, #assignment_id, work_date, hours, started_at, finished_at, note, created_at, updated_at)
-- **CHECKLIST_ITEM**(<u>id</u>, #task_id, section, title, position, #assignee_id, #done_by_id, done_at)
+- **CHECKLIST_ITEM**(<u>id</u>, #task_id, checklist_title, element, position, #assignee_id, #done_by_id, done_at)
 
 **Współpraca, koszty i historia**
 
@@ -346,7 +346,7 @@ Rola = nazwany zestaw uprawnień (Księgowa, Młodsza księgowa, Admin projektu�
 
 Nadanie roli osobie ALBO grupie, w całej firmie (project_id = null – obowiązuje we wszystkich projektach) albo w jednym projekcie. Uprawnienia osoby = role własne + role jej grup i grup nadrzędnych, z poziomu firmy i projektu.
 
-**ROLE_ASSIGNMENT**(<u>id</u>, #role_id, #member_id, #group_id, #project_id, created_at)
+**ROLE_ASSIGNMENT**(<u>id</u>, #role_id, #member_id, #group_id, #project_id, created_at, updated_at)
 
 | Atrybut | Typ | Dziedzina | NULL | Klucz | Opis |
 |---|---|---|---|---|---|
@@ -356,6 +356,7 @@ Nadanie roli osobie ALBO grupie, w całej firmie (project_id = null – obowiąz
 | group_id | `bigint` | liczba całkowita 64-bit (identyfikator) | tak | FK → member_group | grupa (XOR) |
 | project_id | `bigint` | liczba całkowita 64-bit (identyfikator) | tak | FK → project | null = cała firma |
 | created_at | `timestamptz` | data i czas ze strefą | nie |  |  |
+| updated_at | `timestamptz` | data i czas ze strefą | nie |  | ostatnia zmiana nadania |
 
 **Klucze obce**
 
@@ -373,7 +374,7 @@ Nadanie roli osobie ALBO grupie, w całej firmie (project_id = null – obowiąz
 
 **Zależności funkcyjne**
 
-- {id} → {role_id, member_id, group_id, project_id, created_at}
+- {id} → {role_id, member_id, group_id, project_id, created_at, updated_at}
 
 **Postać normalna:** BCNF – jedynym wyznacznikiem są klucze (kandydujące).
 
@@ -473,7 +474,7 @@ Projekt – z bazy, dostaje firmę. Może dodać własne statusy (task_status.pr
 
 Etap projektu z terminem.
 
-**MILESTONE**(<u>id</u>, #project_id, name, status, due_date, position)
+**MILESTONE**(<u>id</u>, #project_id, name, status, due_date, position, created_at, updated_at)
 
 | Atrybut | Typ | Dziedzina | NULL | Klucz | Opis |
 |---|---|---|---|---|---|
@@ -483,6 +484,8 @@ Etap projektu z terminem.
 | status | `varchar` | tekst o ograniczonej długości | nie |  | planned / active / done |
 | due_date | `date` | data | tak |  |  |
 | position | `smallint` | liczba całkowita 16-bit | nie |  |  |
+| created_at | `timestamptz` | data i czas ze strefą | nie |  |  |
+| updated_at | `timestamptz` | data i czas ze strefą | nie |  | ostatnia edycja |
 
 **Klucze obce**
 
@@ -496,7 +499,7 @@ Etap projektu z terminem.
 
 **Zależności funkcyjne**
 
-- {id} → {project_id, name, status, due_date, position}
+- {id} → {project_id, name, status, due_date, position, created_at, updated_at}
 
 **Postać normalna:** BCNF – jedynym wyznacznikiem są klucze (kandydujące).
 
@@ -773,16 +776,16 @@ Ewidencja czasu: data, godziny, opcjonalnie dokładny start i koniec. Wpis nale�
 
 ### 17. checklist_item
 
-Punkt checklisty w zadaniu; section grupuje punkty, gdy list jest kilka.
+Punkt (element) checklisty w zadaniu; checklist_title grupuje punkty, gdy zadanie ma kilka checklist.
 
-**CHECKLIST_ITEM**(<u>id</u>, #task_id, section, title, position, #assignee_id, #done_by_id, done_at)
+**CHECKLIST_ITEM**(<u>id</u>, #task_id, checklist_title, element, position, #assignee_id, #done_by_id, done_at)
 
 | Atrybut | Typ | Dziedzina | NULL | Klucz | Opis |
 |---|---|---|---|---|---|
 | id | `bigint` | liczba całkowita 64-bit (identyfikator) | nie | PK |  |
 | task_id | `bigint` | liczba całkowita 64-bit (identyfikator) | nie | FK → task |  |
-| section | `varchar` | tekst o ograniczonej długości | tak |  |  |
-| title | `varchar` | tekst o ograniczonej długości | nie |  |  |
+| checklist_title | `varchar` | tekst o ograniczonej długości | tak |  | tytuł checklisty w zadaniu |
+| element | `varchar` | tekst o ograniczonej długości | nie |  | treść punktu do odhaczenia |
 | position | `smallint` | liczba całkowita 16-bit | nie |  |  |
 | assignee_id | `bigint` | liczba całkowita 64-bit (identyfikator) | tak | FK → organization_member | kto ma odhaczyć |
 | done_by_id | `bigint` | liczba całkowita 64-bit (identyfikator) | tak | FK → organization_member |  |
@@ -798,13 +801,13 @@ Punkt checklisty w zadaniu; section grupuje punkty, gdy list jest kilka.
 
 **Zależności funkcyjne**
 
-- {id} → {task_id, section, title, position, assignee_id, done_by_id, done_at}
+- {id} → {task_id, checklist_title, element, position, assignee_id, done_by_id, done_at}
 
 **Postać normalna:** BCNF – jedynym wyznacznikiem są klucze (kandydujące).
 
 **Indeksy**
 
-- `CREATE INDEX checklist_item_task_ix ON checklist_item (task_id, section, position)`
+- `CREATE INDEX checklist_item_task_ix ON checklist_item (task_id, checklist_title, position)`
 - `CREATE INDEX checklist_item_assignee_ix ON checklist_item (assignee_id)`
 - `CREATE INDEX checklist_item_done_by_ix ON checklist_item (done_by_id)`
 

@@ -104,7 +104,6 @@ class Command(BaseCommand):
                 title=spec["title"],
                 defaults={
                     "description": "",
-                    "default_status": "todo",
                     "default_priority": spec["default_priority"],
                     "default_est_hours": None,
                     "default_due_days": spec["default_due_days"],
@@ -139,7 +138,6 @@ class Command(BaseCommand):
             title="Soundcheck",
             defaults={
                 "description": "Ustawić nagłośnienie i monitory",
-                "status": "todo",
                 "priority": 2,
                 "due_date": proj_a.start_date,
             },
@@ -149,7 +147,6 @@ class Command(BaseCommand):
             title="Kupić struny",
             defaults={
                 "description": "Komplet strun do gitary",
-                "status": "todo",
                 "priority": 1,
                 "due_date": proj_b.start_date,
             },

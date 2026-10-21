@@ -39,6 +39,7 @@ class TaskAssignment(models.Model):
     )
 
     class Meta:
+        db_table = "promt_task_assignment"
         unique_together = ("task", "user")
         ordering = ["-assigned_at"]
 

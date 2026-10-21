@@ -1,6 +1,11 @@
-from rest_framework import serializers
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
+from rest_framework import serializers
+
+from . import access
 from .models import (
+    Organization,
+    Status,
     Project,
     Funding,
     ProjectFunding,
@@ -14,6 +19,23 @@ from django.db.models import Q
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
+
+
+def builtin_task_statuses():
+    return Status.objects.filter(
+        organization__isnull=True, applies_to=Status.AppliesTo.TASK
+    )
+
+
+class TaskStatusField(serializers.SlugRelatedField):
+    """Task status exposed by its code (todo, doing, to_review, in_review, done)."""
+
+    def __init__(self, **kwargs):
+        kwargs.setdefault("slug_field", "code")
+        super().__init__(**kwargs)
+
+    def get_queryset(self):
+        return builtin_task_statuses()
 
 
 # ---------- FUNDING ---------
@@ -42,6 +64,7 @@ class FundingSerializer(serializers.ModelSerializer):
 
 class FundingTaskSerializer(serializers.ModelSerializer):
     funding_name = serializers.ReadOnlyField(source="funding.name")
+    default_status = TaskStatusField(required=False)
 
     class Meta:
         model = FundingTask
@@ -121,6 +144,10 @@ class TaskSerializer(serializers.ModelSerializer):
     project_name = serializers.CharField(source="scope.project.name", read_only=True)
     funding_name = serializers.CharField(source="scope.funding.name", read_only=True)
 
+    status = TaskStatusField(required=False)
+    status_name = serializers.CharField(source="status.name", read_only=True)
+    status_category = serializers.CharField(source="status.category", read_only=True)
+
     assignees = serializers.SerializerMethodField(read_only=True)
 
     assignee_ids = serializers.ListField(
@@ -137,6 +164,8 @@ class TaskSerializer(serializers.ModelSerializer):
             "title",
             "description",
             "status",
+            "status_name",
+            "status_category",
             "priority",
             "start_date",
             "due_date",
@@ -168,6 +197,8 @@ class TaskSerializer(serializers.ModelSerializer):
             "scope_project_funding",
             "project_name",
             "funding_name",
+            "status_name",
+            "status_category",
             "assignees",
         ]
 
@@ -184,7 +215,7 @@ class TaskSerializer(serializers.ModelSerializer):
                 "first_name": u.first_name,
                 "last_name": u.last_name,
                 "email": u.email,
-                "role": getattr(getattr(u, "profile", None), "role", None),
+                "role": access.legacy_role(u),
             }
             for u in users
         ]
@@ -297,6 +328,8 @@ class TaskSerializer(serializers.ModelSerializer):
 
 # ---------- USER PROFILE ----------
 class UserProfileSerializer(serializers.ModelSerializer):
+    role = serializers.SerializerMethodField()
+
     class Meta:
         model = UserProfile
         fields = [
@@ -304,6 +337,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "phone",
             "avatar_url",
         ]
+
+    def get_role(self, obj):
+        return access.legacy_role(obj.user)
 
 
 # ---------- USER ----------
@@ -337,12 +373,12 @@ class UserDetailSerializer(UserSerializer):
         Lekka lista zadań usera — idealna pod kartę „zadania użytkownika”.
         Tutaj możesz dobrać, jakie pola chcesz.
         """
-        user_tasks = obj.tasks.all().select_related("scope")
+        user_tasks = obj.tasks.all().select_related("scope", "status")
         return [
             {
                 "id": t.id,
                 "title": t.title,
-                "status": t.status,
+                "status": t.status.code,
                 "priority": t.priority,
                 "start_date": t.start_date,
                 "due_date": t.due_date,
@@ -403,6 +439,24 @@ class TaskAssignmentSerializer(serializers.ModelSerializer):
 # ---------- ADMIN USER MANAGEMENT ----------
 
 
+def _actor_organization(actor):
+    organization = access.primary_organization(actor)
+    if organization is None and actor.is_superuser:
+        organization = Organization.objects.order_by("id").first()
+    if organization is None:
+        raise serializers.ValidationError("Nie należysz do żadnej organizacji.")
+    return organization
+
+
+def _set_role(actor, organization, user, legacy_role):
+    try:
+        access.set_organization_role(
+            actor, organization, user, access.LEGACY_ROLE_TO_ORG_ROLE[legacy_role]
+        )
+    except DjangoValidationError as exc:
+        raise serializers.ValidationError({"role": exc.messages})
+
+
 class AdminUserCreateSerializer(serializers.Serializer):
     """
     Tworzy nowego User + UserProfile w jednej transakcji.
@@ -438,9 +492,13 @@ class AdminUserCreateSerializer(serializers.Serializer):
                 last_name=validated_data.get("last_name", ""),
                 password=password,
             )
+            actor = self.context["request"].user
+            organization = _actor_organization(actor)
+            access.add_organization_member(actor, organization, user)
+            _set_role(actor, organization, user, role)
+
             # Profile is auto-created by signal or we update it
             profile, _ = UserProfile.objects.get_or_create(user=user)
-            profile.role = role
             profile.phone = phone
             profile.avatar_url = avatar_url
             profile.save()
@@ -487,9 +545,11 @@ class AdminUserUpdateSerializer(serializers.Serializer):
                 instance.set_password(password)
             instance.save()
 
-            profile, _ = UserProfile.objects.get_or_create(user=instance)
             if role is not None:
-                profile.role = role
+                actor = self.context["request"].user
+                _set_role(actor, _actor_organization(actor), instance, role)
+
+            profile, _ = UserProfile.objects.get_or_create(user=instance)
             if phone is not None:
                 profile.phone = phone
             if avatar_url is not None:

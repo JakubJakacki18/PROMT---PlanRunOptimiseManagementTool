@@ -10,6 +10,8 @@ from django.conf import settings
 from django.db import models
 from django.db.models import F, Q
 
+from api.models.status import default_task_status
+
 
 class Task(models.Model):
     """Represents a generic task.
@@ -20,7 +22,7 @@ class Task(models.Model):
     Attributes:
         title: Short human-readable name of the task.
         description: Optional detailed description of the task.
-        status: Current workflow status (todo/doing/done).
+        status: Current workflow status (see Status; logic uses its category).
         priority: Priority level of the task (low/medium/high).
         start_date: Optional planned start date.
         due_date: Optional deadline date.
@@ -31,16 +33,11 @@ class Task(models.Model):
         assignees: Users assigned to the task through TaskAssignment.
         est_hours: Estimated duration of the task in hours.
         template: Optional reference to a FundingTask template.
+        milestone: Optional project milestone the task belongs to.
+        parent: Optional parent task; set for subtasks.
         created_at: Timestamp when the task was created.
         updated_at: Timestamp when the task was last updated.
     """
-
-    class Status(models.TextChoices):
-        """Supported workflow states for a task."""
-
-        TODO = "todo", "To do"
-        DOING = "doing", "Doing"
-        DONE = "done", "Done"
 
     class Priority(models.IntegerChoices):
         """Priority levels used to sort or filter tasks."""
@@ -52,10 +49,12 @@ class Task(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
 
-    status = models.CharField(
-        max_length=10,
-        choices=Status.choices,
-        default=Status.TODO,
+    status = models.ForeignKey(
+        "api.Status",
+        on_delete=models.PROTECT,
+        blank=True,
+        related_name="tasks",
+        limit_choices_to={"applies_to": "task"},
     )
     priority = models.IntegerField(
         choices=Priority.choices,
@@ -98,12 +97,32 @@ class Task(models.Model):
         related_name="instances",
     )
 
+    milestone = models.ForeignKey(
+        "api.Milestone",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="tasks",
+    )
+    parent = models.ForeignKey(
+        "self",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="subtasks",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         """Meta options for Task."""
 
+        db_table = "promt_task"
+        indexes = [
+            models.Index(fields=["due_date"]),
+            models.Index(fields=["updated_at"]),
+        ]
         constraints = [
             models.CheckConstraint(
                 condition=(
@@ -114,6 +133,18 @@ class Task(models.Model):
                 name="task_dates_ok",
             ),
         ]
+
+    def clean(self):
+        super().clean()
+        self._fill_default_status()
+
+    def save(self, *args, **kwargs):
+        self._fill_default_status()
+        super().save(*args, **kwargs)
+
+    def _fill_default_status(self):
+        if self.status_id is None:
+            self.status_id = default_task_status()
 
     def __str__(self) -> str:
         """Return a human-readable representation of the task."""

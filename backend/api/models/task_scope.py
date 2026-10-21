@@ -58,6 +58,7 @@ class TaskScope(models.Model):
     class Meta:
         """Meta options for TaskScope."""
 
+        db_table = "promt_task_scope"
         constraints = [
             models.CheckConstraint(
                 name="taskscope_exactly_one",

@@ -59,9 +59,11 @@ class TestProjectFundingModel:
 class TestFundingTaskModel:
 
     # 8. Test sprawdzający domyślny status zadania
+    @pytest.mark.django_db
     def test_funding_task_status_no_input_returns_todo(self):
-        task = FundingTask(title="Task 1")
-        assert task.default_status == FundingTask.DefaultStatus.TODO
+        funding = Funding.objects.create(name="Grant")
+        task = FundingTask.objects.create(funding=funding, title="Task 1")
+        assert task.default_status.code == "todo"
 
     # 9. Test sprawdzający domyślny priorytet jako Integer
     def test_funding_task_priority_no_input_returns_medium_value(self):

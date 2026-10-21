@@ -8,6 +8,20 @@ from .models import (
     TaskScope,
     TaskAssignment,
     UserProfile,
+    Organization,
+    Status,
+    OrganizationMember,
+    Permission,
+    Role,
+    RolePermission,
+    Team,
+    TeamMember,
+    RoleAssignment,
+    Milestone,
+    Checklist,
+    ChecklistItem,
+    Notification,
+    ActivityLog,
 )
 
 
@@ -238,8 +252,8 @@ class ProjectFundingAdmin(admin.ModelAdmin):
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ("user", "role", "phone")
-    list_filter = ("role",)
+    list_display = ("user", "phone")
+    search_fields = ("user__username",)
 
 
 @admin.register(TaskAssignment)
@@ -252,3 +266,102 @@ class TaskAssignmentAdmin(admin.ModelAdmin):
         "user__first_name",
         "user__last_name",
     )
+
+
+@admin.register(Organization)
+class OrganizationAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "slug", "tax_id", "is_active", "created_at")
+    search_fields = ("name", "slug", "tax_id")
+    list_filter = ("is_active",)
+    prepopulated_fields = {"slug": ("name",)}
+
+
+@admin.register(OrganizationMember)
+class OrganizationMemberAdmin(admin.ModelAdmin):
+    list_display = ("organization", "user", "is_active", "invited_by", "joined_at")
+    list_filter = ("is_active", ("organization", admin.RelatedOnlyFieldListFilter))
+    search_fields = ("organization__name", "user__username")
+
+
+@admin.register(Permission)
+class PermissionAdmin(admin.ModelAdmin):
+    list_display = ("code", "scope", "description")
+    list_filter = ("scope",)
+    search_fields = ("code", "description")
+
+
+class RolePermissionInline(admin.TabularInline):
+
+    model = RolePermission
+    extra = 0
+
+
+@admin.register(Role)
+class RoleAdmin(admin.ModelAdmin):
+    list_display = ("code", "name", "scope", "organization")
+    list_filter = ("scope", ("organization", admin.RelatedOnlyFieldListFilter))
+    search_fields = ("code", "name")
+    inlines = [RolePermissionInline]
+
+
+class TeamMemberInline(admin.TabularInline):
+
+    model = TeamMember
+    fk_name = "team"
+    extra = 0
+
+
+@admin.register(Team)
+class TeamAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "organization", "project", "parent", "created_at")
+    search_fields = ("name",)
+    inlines = [TeamMemberInline]
+
+
+@admin.register(RoleAssignment)
+class RoleAssignmentAdmin(admin.ModelAdmin):
+    list_display = ("role", "user", "team", "organization", "project", "granted_by", "created_at")
+    list_filter = ("role",)
+    search_fields = ("user__username", "team__name")
+
+
+@admin.register(Status)
+class StatusAdmin(admin.ModelAdmin):
+    list_display = ("code", "name", "applies_to", "category", "position", "organization", "is_default")
+    list_filter = ("applies_to", "category")
+    ordering = ("applies_to", "position")
+
+
+@admin.register(Milestone)
+class MilestoneAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "project", "status", "due_date")
+    list_filter = ("status", ("project", admin.RelatedOnlyFieldListFilter))
+    search_fields = ("name", "project__name")
+    autocomplete_fields = ["project"]
+
+
+class ChecklistItemInline(admin.TabularInline):
+
+    model = ChecklistItem
+    extra = 0
+
+
+@admin.register(Checklist)
+class ChecklistAdmin(admin.ModelAdmin):
+    list_display = ("id", "title", "task", "position", "created_at")
+    search_fields = ("title", "task__title")
+    autocomplete_fields = ["task"]
+    inlines = [ChecklistItemInline]
+
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ("recipient", "activity", "read_at")
+    search_fields = ("recipient__username",)
+
+
+@admin.register(ActivityLog)
+class ActivityLogAdmin(admin.ModelAdmin):
+    list_display = ("created_at", "actor", "action", "content_type", "object_id", "organization", "project")
+    list_filter = ("action", ("project", admin.RelatedOnlyFieldListFilter))
+    search_fields = ("actor__username",)

@@ -77,6 +77,7 @@ Table "role_assignment" {
   "group_id" bigint [null, note: 'grupa (XOR)']
   "project_id" bigint [null, note: 'null = cała firma']
   "created_at" timestamptz [not null]
+  "updated_at" timestamptz [not null, note: 'ostatnia zmiana nadania']
   Note: 'Nadanie roli osobie ALBO grupie, w całej firmie (project_id = null – obowiązuje we wszystkich projektach) albo w jednym projekcie. Uprawnienia osoby = role własne + role jej grup i grup nadrzędnych, z poziomu firmy i projektu.'
 }
 
@@ -115,6 +116,8 @@ Table "milestone" {
   "status" varchar [not null, note: 'planned / active / done']
   "due_date" date [null]
   "position" smallint [not null]
+  "created_at" timestamptz [not null]
+  "updated_at" timestamptz [not null, note: 'ostatnia edycja']
   Note: 'Etap projektu z terminem.'
 }
 
@@ -209,13 +212,13 @@ Table "time_entry" {
 Table "checklist_item" {
   "id" bigint [pk, not null]
   "task_id" bigint [not null]
-  "section" varchar [null]
-  "title" varchar [not null]
+  "checklist_title" varchar [null, note: 'tytuł checklisty w zadaniu']
+  "element" varchar [not null, note: 'treść punktu do odhaczenia']
   "position" smallint [not null]
   "assignee_id" bigint [null, note: 'kto ma odhaczyć']
   "done_by_id" bigint [null]
   "done_at" timestamptz [null]
-  Note: 'Punkt checklisty w zadaniu; section grupuje punkty, gdy list jest kilka.'
+  Note: 'Punkt (element) checklisty w zadaniu; checklist_title grupuje punkty, gdy zadanie ma kilka checklist.'
 }
 
 Table "comment" {

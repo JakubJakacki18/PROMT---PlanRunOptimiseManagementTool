@@ -8,24 +8,11 @@ phone_validator = RegexValidator(
 )
 
 
-class UserRole(models.TextChoices):
-    ADMIN = "admin", "Administrator"
-    PM = "pm", "Project Manager"
-    MEMBER = "member", "Członek zespołu"
-    VIEWER = "viewer", "Viewer"
-
-
 class UserProfile(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="profile",
-    )
-
-    role = models.CharField(
-        max_length=20,
-        choices=UserRole.choices,
-        default=UserRole.MEMBER,
     )
 
     phone = models.CharField(
@@ -39,6 +26,9 @@ class UserProfile(models.Model):
         blank=True,
         help_text="URL to the user's avatar image - optional",
     )
+
+    class Meta:
+        db_table = "promt_user_profile"
 
     def clean_fields(self, exclude=None):
         if self.phone:
@@ -57,4 +47,4 @@ class UserProfile(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.user.username} ({self.get_role_display()})"
+        return self.user.username

@@ -13,6 +13,14 @@ class Project(models.Model):
     description = models.TextField(blank=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.NEW)
 
+    organization = models.ForeignKey(
+        "api.Organization",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="projects",
+    )
+
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -32,6 +40,7 @@ class Project(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        db_table = "promt_project"
         constraints = [
             models.CheckConstraint(
                 condition=(
